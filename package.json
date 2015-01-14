@@ -11,9 +11,10 @@
   "license": "MIT",
   "dependencies": {
     "cors": "^2.5.2",
-    "express": "^4.10.6",
+    "express": "^4.11.0",
     "jsend": "^0.1.2",
-    "morgan": "^1.5.0"
+    "morgan": "^1.5.1",
+    "typeforce": "^0.1.0"
   },
   "devDependencies": {
     "supervisor": "^0.6.0"
