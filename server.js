@@ -3,7 +3,7 @@ var cors = require('cors')
 var express = require('express')
 var morgan = require('morgan')
 
-var createApp = require('./lib')
+var createApp = require('./src')
 
 ////////////////////////////////////////////////////////
 

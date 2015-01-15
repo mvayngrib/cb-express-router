@@ -4,12 +4,12 @@ var swig = require("swig")
 var typeforce = require('typeforce')
 
 var sql = {
-  addressSummary: swig.compileFile('./lib/sql/addressSummary.sql')
+  addressSummary: swig.compileFile('./src/sql/addressSummary.sql')
 }
 
 function Addresses(connString, networkStr) {
   this.connString = connString
-  this.network = bitcoinjs[networkStr]
+  this.network = bitcoinjs.networks[networkStr]
   this.networkStr = networkStr
 }
 
@@ -30,19 +30,22 @@ Addresses.prototype.summary = function(req, res) {
 
   try {
     typeforce(['String'], addresses)
+    console.log(this.network, this.networkStr)
     addresses.forEach(self.__validateAddress.bind(self))
 
   } catch (e) {
-    return res.jsend.fail(e)
+    return res.jsend.fail(e.message)
   }
 
   var query = sql.addressSummary({ addresses: addresses })
+
+  console.log(query)
 
   pg.connect(this.connString, function(err, client, free) {
     client.query(query, function(err, results) {
       free()
 
-      if (err) return res.jsend.error(err)
+      if (err) return res.jsend.error(err.message)
 
       return res.jsend.success(results.rows.map(function(row) {
         return {
@@ -56,7 +59,7 @@ Addresses.prototype.summary = function(req, res) {
   })
 }
 
-//Addresses.prototype.trasnactions = function(req, res) {
+//Addresses.prototype.transactions = function(req, res) {
 //  var addresses = req.body.addresses
 //  var blockHeight = req.body.blockHeight || 0
 //

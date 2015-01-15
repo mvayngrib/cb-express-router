@@ -17,11 +17,11 @@ FROM (
 		addr_summary.confirmed_balance,
 		addr_summary.confirmed_received_amount
 	FROM addr_summary
-	WHERE addr_bs58 = {{address|safe}}
+	WHERE addr_bs58 = '{{address|safe}}'
 ) AS confirmed
 FULL JOIN (
 	SELECT * FROM unconfirmed_addr_summary
-	WHERE addr_bs58 = {{address|safe}}
+	WHERE addr_bs58 = '{{address|safe}}'
 ) As unconfirmed
 USING (addr_bs58)
 -- End one addr statement
