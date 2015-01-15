@@ -30,7 +30,6 @@ Addresses.prototype.summary = function(req, res) {
 
   try {
     typeforce(['String'], addresses)
-    console.log(this.network, this.networkStr)
     addresses.forEach(self.__validateAddress.bind(self))
 
   } catch (e) {
@@ -38,8 +37,6 @@ Addresses.prototype.summary = function(req, res) {
   }
 
   var query = sql.addressSummary({ addresses: addresses })
-
-  console.log(query)
 
   pg.connect(this.connString, function(err, client, free) {
     client.query(query, function(err, results) {
