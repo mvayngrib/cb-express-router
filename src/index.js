@@ -18,9 +18,8 @@ function createApp(config) {
   // common blockchain api
   var addresses = new Addresses(config.postgres, config.network)
   app.post('/addresses/summary', addresses.summary.bind(addresses))
-//  app.post('/addresses/summary', addresses.summary.bind(undefined, connString))
 //  app.post('/addresses/transactions', addresses.transactions.bind(undefined, connString))
-//  app.post('/addresses/unspents', addresses.unspents.bind(undefined, connString))
+  app.post('/addresses/unspents', addresses.unspents.bind(addresses))
 //
 //    var blocks = new Blocks(connString)
 //  app.post('/blocks/get', blocks.get.bind(undefined, connString))

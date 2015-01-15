@@ -119,10 +119,10 @@ Addresses.prototype.unspents = function(req, res) {
 
       return res.jsend.success(results.rows.map(function(row) {
         return {
-          txId: row.txId,
+          txId: row.tx_hash,
           confirmations: row.confirmations,
-          address: row.address,
-          value: row.value,
+          address: row.addr_bs58,
+          value: row.txout_value,
           vout: row.vout
         }
       }))
