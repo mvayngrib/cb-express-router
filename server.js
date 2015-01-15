@@ -3,11 +3,11 @@ var cors = require('cors')
 var express = require('express')
 var morgan = require('morgan')
 
-var API = require('./lib')
+var createApp = require('./lib')
 
 ////////////////////////////////////////////////////////
 
-var api = API.createApp(config)
+var api = createApp(config)
 var app = express()
 
 // reverse proxy in use
@@ -23,7 +23,7 @@ app.use(morgan('tiny'))
 app.use(cors())
 
 // our custom api
-app.use(api())
+app.use(api)
 
 ////////////////////////////////////////////////////////
 
