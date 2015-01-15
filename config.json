@@ -1,0 +1,5 @@
+{
+  "network": "testnet",
+  "port": 8080,
+  "postgres": ""
+}
