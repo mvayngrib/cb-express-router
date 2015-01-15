@@ -4,7 +4,9 @@ var swig = require("swig")
 var typeforce = require('typeforce')
 
 var sql = {
-  addressSummary: swig.compileFile('./src/sql/addressSummary.sql')
+  summary: swig.compileFile('./src/sql/addressSummary.sql'),
+  transactions: swig.compileFile('./src/sql/addressTransactions.sql'),
+  unspents: swig.compileFile('./src/sql/addressUnspents.sql')
 }
 
 function Addresses(connString, networkStr) {
@@ -36,9 +38,11 @@ Addresses.prototype.summary = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  var query = sql.addressSummary({ addresses: addresses })
+  var query = sql.summary({ addresses: addresses })
 
   pg.connect(this.connString, function(err, client, free) {
+    if (err) return res.jsend.error(err.message)
+
     client.query(query, function(err, results) {
       free()
 
@@ -56,43 +60,74 @@ Addresses.prototype.summary = function(req, res) {
   })
 }
 
-//Addresses.prototype.transactions = function(req, res) {
-//  var addresses = req.body.addresses
-//  var blockHeight = req.body.blockHeight || 0
-//
-//  try {
-//    typeforce(['String'], addresses)
-//    addresses.forEach(validateAddress.bind(undefined, bc.network))
-//
-//    typeforce('Number', blockHeight)
-//  } catch (e) {
-//    return req.jsend.fail(e)
-//  }
-//
-//  bc.addressTransactions(addresses, blockHeight, function(err, results) {
-//    if (err) return res.jsend.error('Something went wrong')
-//
-//    return res.jsend.success(results)
-//  })
-//}
-//
-//  unspents: function(bc, req, res) {
-//    var addresses = req.body.addresses
-//
-//    try {
-//      typeforce(['String'], addresses)
-//      addresses.forEach(validateAddress.bind(undefined, bc.network))
-//
-//    } catch (e) {
-//      return req.jsend.fail(e)
-//    }
-//
-//    bc.addressUnspents(addresses, function(err, results) {
-//      if (err) return res.jsend.error('Something went wrong')
-//
-//      return res.jsend.success(results)
-//    })
-//  }
-//}
+Addresses.prototype.transactions = function(req, res) {
+  var addresses = req.body.addresses
+  var blockHeight = req.body.blockHeight || 0
+  var self = this
+
+  try {
+    typeforce(['String'], addresses)
+    addresses.forEach(self.__validateAddress.bind(self))
+
+  } catch (e) {
+    return res.jsend.fail(e.message)
+  }
+
+  var query = sql.transactions({ addresses: addresses, blockHeight: blockHeight })
+
+  pg.connect(this.connString, function(err, client, free) {
+    if (err) return res.jsend.error(err.message)
+
+    client.query(query, function(err, results) {
+      free()
+
+      if (err) return res.jsend.error(err.message)
+
+      return res.jsend.success(results.rows.map(function(row) {
+        return {
+          txId: row.txId,
+          txHex: row.txHex,
+          blockId: row.blockId,
+          blockHeight: row.blockHeight
+        }
+      }))
+    })
+  })
+}
+
+Addresses.prototype.unspents = function(req, res) {
+  var addresses = req.body.addresses
+  var self = this
+
+  try {
+    typeforce(['String'], addresses)
+    addresses.forEach(self.__validateAddress.bind(self))
+
+  } catch (e) {
+    return res.jsend.fail(e.message)
+  }
+
+  var query = sql.unspents({ addresses: addresses })
+
+  pg.connect(this.connString, function(err, client, free) {
+    if (err) return res.jsend.error(err.message)
+
+    client.query(query, function(err, results) {
+      free()
+
+      if (err) return res.jsend.error(err.message)
+
+      return res.jsend.success(results.rows.map(function(row) {
+        return {
+          txId: row.txId,
+          confirmations: row.confirmations,
+          address: row.address,
+          value: row.value,
+          vout: row.vout
+        }
+      }))
+    })
+  })
+}
 
 module.exports = Addresses
