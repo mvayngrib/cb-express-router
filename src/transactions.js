@@ -37,59 +37,84 @@ Transactions.prototype.get = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
+  var queryInfo = sql.getInfo({ txIds: txIds })
+  var queryInputs = sql.getInputs({ txIds: txIds })
+  var queryOutputs = sql.getOutputs({ txIds: txIds })
+
   pg.connect(this.connString, function(err, client, free) {
     if (err) return res.jsend.error(err.message)
 
-    async.map(txIds, function(txId, callback) {
-      var queryInfo = sql.getInfo({ txId: txId })
-      var queryInputs = sql.getInputs({ txId: txId })
-      var queryOutputs = sql.getOutputs({ txId: txId })
-
-      async.parallel([
-        client.query.bind(client, queryInfo),
-        client.query.bind(client, queryInputs),
-        client.query.bind(client, queryOutputs)
-      ], function(err, results) {
-        if (err) return callback(err)
-
-        var info = results[0].rows[0]
-        var inputs = results[1].rows
-        var outputs = results[2].rows
-
-        if (!info) return callback(new Error(txId + ' not found'))
-
-        var tx = new bitcoinjs.Transaction()
-
-        tx.locktime = parseInt(info.tx_locktime)
-        tx.version = parseInt(info.tx_version)
-
-        inputs.forEach(function(txIn) {
-          var index = parseInt(txIn.prev_txout_pos)
-          var script = bitcoinjs.Script.fromHex(txIn.txin_scriptsig)
-          var sequence = parseInt(txIn.txin_sequence)
-          var txId = txIn.prev_tx_hash
-
-          tx.addInput(txId, index, sequence, script)
-        })
-
-        outputs.forEach(function(txOut) {
-          var script = bitcoinjs.Script.fromHex(txOut.txout_scriptpubkey)
-          tx.addOutput(script, parseInt(txOut.txout_value))
-        })
-
-        return callback(undefined, {
-          txId: txId,
-          txHex: tx.toHex(),
-          blockId: info.block_hash,
-          blockHeight: info.block_height
-        })
-      })
-    }, function(err, results) {
+    async.parallel([
+      client.query.bind(client, queryInfo),
+      client.query.bind(client, queryInputs),
+      client.query.bind(client, queryOutputs)
+    ], function(err, results) {
       free()
 
-      if (err) return res.jsend.fail(err.message)
+      if (err) return res.jsend.error(err.message)
 
-      return res.jsend.success(results)
+      var info = results[0].rows
+      var inputs = results[1].rows
+      var outputs = results[2].rows
+
+      var seen = {}
+      info.forEach(function(row) {
+        var detail = row
+        detail.inputs = []
+        detail.outputs = []
+
+        seen[row.tx_hash] = detail
+      })
+
+      try {
+        inputs.forEach(function(row) {
+          var txId = row.tx_hash
+          if (!(txId in seen)) throw new Error(txId + ' is weird')
+
+          seen[txId].inputs[row.txin_pos] = row
+        })
+
+        outputs.forEach(function(row) {
+          var txId = row.tx_hash
+          if (!(txId in seen)) throw new Error(txId + ' is weird')
+
+          seen[txId].outputs[row.txout_pos] = row
+        })
+
+        return res.jsend.success(txIds.map(function(txId) {
+          if (!(txId in seen)) throw new Error(txId + ' not found')
+
+          var detail = seen[txId]
+          var tx = new bitcoinjs.Transaction()
+
+          tx.locktime = parseInt(detail.tx_locktime)
+          tx.version = parseInt(detail.tx_version)
+
+          detail.inputs.forEach(function(txIn) {
+            var index = parseInt(txIn.prev_txout_pos)
+            var script = bitcoinjs.Script.fromHex(txIn.txin_scriptsig)
+            var sequence = parseInt(txIn.txin_sequence)
+            var txId = txIn.prev_tx_hash
+
+            tx.addInput(txId, index, sequence, script)
+          })
+
+          detail.outputs.forEach(function(txOut) {
+            var script = bitcoinjs.Script.fromHex(txOut.txout_scriptpubkey)
+            tx.addOutput(script, parseInt(txOut.txout_value))
+          })
+
+          return {
+            txId: txId,
+            txHex: tx.toHex(),
+            blockId: detail.block_hash,
+            blockHeight: detail.block_height
+          }
+        }))
+
+      } catch (err) {
+        return res.jsend.fail(err.message)
+      }
     })
   })
 }

@@ -1,5 +1,6 @@
-SELECT *
-FROM txout
-WHERE tx_hash = '{{txId}}'
-ORDER BY txout_pos
-
+{% for txId in txIds %}
+	SELECT *
+	FROM txout
+	WHERE tx_hash = '{{txId}}'
+{% if loop.last !== true %}UNION ALL{% endif %}
+{% endfor %}
