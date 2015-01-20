@@ -48,47 +48,36 @@ Addresses.prototype.summary = function(req, res) {
 
       if (err) return res.jsend.error(err.message)
 
-      return res.jsend.success(results.rows.map(function(row) {
-        return {
-          address: row.addr_bs58,
-          balance: row.total_balance,
-          totalReceived: row.total_received_amount,
-          txCount: row.total_tx_count
+      var seen = {}
+      results.rows.forEach(function(row) {
+        var result
+
+        if (row.unconfirmed_balance === null) {
+          result = {
+            address: row.addr_bs58,
+            balance: row.confirmed_balance,
+            totalReceived: row.confirmed_received_amount,
+            txCount: row.confirmed_received_tx_count
+          }
+
+        } else {
+          result = {
+            address: row.addr_bs58,
+            balance: row.confirmed_balance + row.unconfirmed_balance,
+            totalReceived: row.confirmed_received_amount + row.unconfirmed_received_amount,
+            txCount: row.confirmed_received_tx_count + row.unconfirmed_received_tx_count
+          }
         }
-      }))
-    })
-  })
-}
 
-Addresses.prototype.transactions = function(req, res) {
-  var addresses = req.body.addresses
-  var blockHeight = req.body.blockHeight || 0
-  var self = this
+        seen[row.addr_bs58] = result
+      })
 
-  try {
-    typeforce(['String'], addresses)
-    addresses.forEach(self.__validateAddress.bind(self))
-
-  } catch (e) {
-    return res.jsend.fail(e.message)
-  }
-
-  var query = sql.transactions({ addresses: addresses, blockHeight: blockHeight })
-
-  pg.connect(this.connString, function(err, client, free) {
-    if (err) return res.jsend.error(err.message)
-
-    client.query(query, function(err, results) {
-      free()
-
-      if (err) return res.jsend.error(err.message)
-
-      return res.jsend.success(results.rows.map(function(row) {
-        return {
-          txId: row.txId,
-          txHex: row.txHex,
-          blockId: row.blockId,
-          blockHeight: row.blockHeight
+      return res.jsend.success(addresses.map(function(address) {
+        return seen[address] || {
+          address: address,
+          balance: 0,
+          totalReceived: 0,
+          txCount: 0
         }
       }))
     })
