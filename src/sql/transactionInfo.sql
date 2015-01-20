@@ -1,9 +1,9 @@
 {% for txId in txIds %}
-	SELECT *
+	SELECT tx_hash, tx_version, tx_locktime, block_hash, block_height
 	FROM tx
-	LEFT JOIN block_tx
+	INNER JOIN block_tx
 	USING (tx_hash)
-	LEFT JOIN block
+	INNER JOIN block
 	USING (block_hash)
 	WHERE tx_hash = '{{txId}}' and block_in_longest = true
 {% if loop.last !== true %}UNION ALL{% endif %}
