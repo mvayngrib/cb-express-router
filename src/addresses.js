@@ -5,7 +5,7 @@ var typeforce = require('typeforce')
 
 var sql = {
   summary: swig.compileFile('./src/sql/addressSummary.sql'),
-  transactions: swig.compileFile('./src/sql/addressTransactions.sql'),
+//  transactions: swig.compileFile('./src/sql/addressTransactions.sql'),
   unspents: swig.compileFile('./src/sql/addressUnspents.sql')
 }
 
