@@ -3,9 +3,10 @@ var bitcoinjs = require('bitcoinjs-lib')
 var pg = require('pg')
 var swig = require("swig")
 var typeforce = require('typeforce')
+var utils = require('./utils')
 
 var sql = {
-  getInfo: swig.compileFile('./src/sql/transactionInfo.sql'),
+  getDetail: swig.compileFile('./src/sql/transactionDetail.sql'),
   getInputs: swig.compileFile('./src/sql/transactionIns.sql'),
   getOutputs: swig.compileFile('./src/sql/transactionOuts.sql')
 }
@@ -36,33 +37,33 @@ Transactions.prototype.get = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  var queryInfo = sql.getInfo({ txIds: txIds })
-  var queryInputs = sql.getInputs({ txIds: txIds })
-  var queryOutputs = sql.getOutputs({ txIds: txIds })
+  var bindArgs = utils.bindArguments(txIds.length)
+  var queryDetail = sql.getDetail({ txIds: bindArgs })
+  var queryInputs = sql.getInputs({ txIds: bindArgs })
+  var queryOutputs = sql.getOutputs({ txIds: bindArgs })
 
   pg.connect(this.connString, function(err, client, free) {
     if (err) return res.jsend.error(err.message)
 
     async.parallel([
-      client.query.bind(client, queryInfo),
-      client.query.bind(client, queryInputs),
-      client.query.bind(client, queryOutputs)
+      client.query.bind(client, queryDetail, txIds),
+      client.query.bind(client, queryInputs, txIds),
+      client.query.bind(client, queryOutputs, txIds)
     ], function(err, results) {
       free()
 
       if (err) return res.jsend.error(err.message)
 
-      var info = results[0].rows
+      var details = results[0].rows
       var inputs = results[1].rows
       var outputs = results[2].rows
 
       var seen = {}
-      info.forEach(function(row) {
-        var detail = row
+      details.forEach(function(detail) {
         detail.inputs = []
         detail.outputs = []
 
-        seen[row.tx_hash] = detail
+        seen[detail.tx_hash] = detail
       })
 
       try {
