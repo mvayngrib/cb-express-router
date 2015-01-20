@@ -5,7 +5,6 @@ var swig = require("swig")
 var typeforce = require('typeforce')
 
 var sql = {
-  get: swig.compileFile('./src/sql/transactions.sql'),
   getInfo: swig.compileFile('./src/sql/transactionInfo.sql'),
   getInputs: swig.compileFile('./src/sql/transactionIns.sql'),
   getOutputs: swig.compileFile('./src/sql/transactionOuts.sql')
