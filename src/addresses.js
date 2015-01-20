@@ -112,7 +112,7 @@ Addresses.prototype.unspents = function(req, res) {
           confirmations: row.confirmations,
           address: row.addr_bs58,
           value: row.txout_value,
-          vout: row.vout
+          vout: row.txout_pos
         }
       }))
     })
