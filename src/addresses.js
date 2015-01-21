@@ -1,7 +1,7 @@
 var bitcoinjs = require('bitcoinjs-lib')
-var pg = require('pg')
 var swig = require("swig")
 var typeforce = require('typeforce')
+var utils = require('./utils')
 
 var sql = {
   summary: swig.compileFile('./src/sql/addressSummary.sql'),
@@ -38,49 +38,44 @@ Addresses.prototype.summary = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  var query = sql.summary({ addresses: addresses })
+  var bindArgs = utils.bindArguments(addresses.length)
+  var query = sql.summary({ addresses: bindArgs })
 
-  pg.connect(this.connString, function(err, client, free) {
+  utils.runQuery(this.connString, query, addresses, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
-    client.query(query, function(err, results) {
-      free()
+    var seen = {}
+    results.rows.forEach(function(row) {
+      var result
 
-      if (err) return res.jsend.error(err.message)
-
-      var seen = {}
-      results.rows.forEach(function(row) {
-        var result
-
-        if (row.unconfirmed_balance === null) {
-          result = {
-            address: row.addr_bs58,
-            balance: row.confirmed_balance,
-            totalReceived: row.confirmed_received_amount,
-            txCount: row.confirmed_received_tx_count
-          }
-
-        } else {
-          result = {
-            address: row.addr_bs58,
-            balance: row.confirmed_balance + row.unconfirmed_balance,
-            totalReceived: row.confirmed_received_amount + row.unconfirmed_received_amount,
-            txCount: row.confirmed_received_tx_count + row.unconfirmed_received_tx_count
-          }
+      if (row.unconfirmed_balance === null) {
+        result = {
+          address: row.addr_bs58,
+          balance: row.confirmed_balance,
+          totalReceived: row.confirmed_received_amount,
+          txCount: row.confirmed_received_tx_count
         }
 
-        seen[row.addr_bs58] = result
-      })
-
-      return res.jsend.success(addresses.map(function(address) {
-        return seen[address] || {
-          address: address,
-          balance: 0,
-          totalReceived: 0,
-          txCount: 0
+      } else {
+        result = {
+          address: row.addr_bs58,
+          balance: row.confirmed_balance + row.unconfirmed_balance,
+          totalReceived: row.confirmed_received_amount + row.unconfirmed_received_amount,
+          txCount: row.confirmed_received_tx_count + row.unconfirmed_received_tx_count
         }
-      }))
+      }
+
+      seen[row.addr_bs58] = result
     })
+
+    return res.jsend.success(addresses.map(function(address) {
+      return seen[address] || {
+        address: address,
+        balance: 0,
+        totalReceived: 0,
+        txCount: 0
+      }
+    }))
   })
 }
 
@@ -96,26 +91,21 @@ Addresses.prototype.unspents = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  var query = sql.unspents({ addresses: addresses })
+  var bindArgs = utils.bindArguments(addresses.length)
+  var query = sql.unspents({ addresses: bindArgs })
 
-  pg.connect(this.connString, function(err, client, free) {
+  utils.runQuery(this.connString, query, addresses, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
-    client.query(query, function(err, results) {
-      free()
-
-      if (err) return res.jsend.error(err.message)
-
-      return res.jsend.success(results.rows.map(function(row) {
-        return {
-          txId: row.tx_hash,
-          confirmations: row.confirmations,
-          address: row.addr_bs58,
-          value: row.txout_value,
-          vout: row.txout_pos
-        }
-      }))
-    })
+    return res.jsend.success(results.rows.map(function(row) {
+      return {
+        txId: row.tx_hash,
+        confirmations: row.confirmations,
+        address: row.addr_bs58,
+        value: row.txout_value,
+        vout: row.txout_pos
+      }
+    }))
   })
 }
 
