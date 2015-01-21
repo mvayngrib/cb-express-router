@@ -106,4 +106,80 @@ Transactions.prototype.propagate = function(req, res) {
   })
 }
 
+Transactions.prototype.summary = function(req, res) {
+  var txIds = req.body.txIds
+
+  try {
+    typeforce(['String'], txIds)
+    txIds.forEach(utils.validateTransactionId)
+
+  } catch (e) {
+    return res.jsend.fail(e.message)
+  }
+
+  var bindArgs = utils.bindArguments(txIds.length)
+  var query = sql.get({ txIds: bindArgs })
+  var queryInputs = sql.getInputs({ txIds: bindArgs })
+  var queryOutputs = sql.getOutputs({ txIds: bindArgs })
+
+  async.parallel([
+    utils.runQuery.bind(null, this.connString, query, txIds),
+    utils.runQuery.bind(null, this.connString, queryInputs, txIds),
+    utils.runQuery.bind(null, this.connString, queryOutputs, txIds)
+  ], function(err, results) {
+    if (err) return res.jsend.error(err.message)
+
+    var details = results[0]
+    var inputs = results[1]
+    var outputs = results[2]
+
+    var seen = {}
+    details.forEach(function(detail) {
+      detail.inputs = []
+      detail.outputs = []
+
+      seen[detail.tx_hash] = detail
+    })
+
+    try {
+      inputs.forEach(function(row) {
+        var txId = row.tx_hash
+        if (!(txId in seen)) throw txId + ' is weird'
+
+        seen[txId].inputs[row.txin_pos] = row
+      })
+
+      outputs.forEach(function(row) {
+        var txId = row.tx_hash
+        if (!(txId in seen)) throw txId + ' is weird'
+
+        seen[txId].outputs[row.txout_pos] = row
+      })
+
+      return res.jsend.success(txIds.map(function(txId) {
+        if (!(txId in seen)) throw txId + ' not found'
+
+        var detail = seen[txId]
+        var totalInputValue = detail.inputs.reduce(function(a, x) { return a + parseInt(x.prev_txout_value) }, 0)
+        var totalOutputValue = detail.outputs.reduce(function(a, x) { return a + parseInt(x.txout_value) }, 0)
+
+        return {
+          txId: txId,
+          blockId: detail.block_hash,
+          blockHeight: detail.block_height,
+          nInputs: detail.inputs.length,
+          nOutputs: detail.outputs.length,
+          totalInputValue: totalInputValue,
+          totalOutputValue: totalOutputValue
+        }
+      }))
+
+      } catch (e) {
+        if (typeof e !== 'string') throw e
+
+        return res.jsend.fail(e)
+      }
+  })
+}
+
 module.exports = Transactions

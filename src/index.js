@@ -34,7 +34,7 @@ function createApp(config) {
   app.post('/transactions/get', transactions.get.bind(transactions))
 //  app.post('/transactions/latest', transactions.latest.bind(transactions))
   app.post('/transactions/propagate', transactions.propagate.bind(transactions))
-//  app.post('/transactions/summary', transactions.summary.bind(transactions))
+  app.post('/transactions/summary', transactions.summary.bind(transactions))
 
   return app
 }
