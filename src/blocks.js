@@ -54,7 +54,7 @@ Blocks.prototype.summary = function(req, res) {
         return {
           blockId: blockId,
           prevBlockId: detail.prev_block_hash,
-          merkleRootHash: detail.hashmerkleroot,
+          merkleRootHash: detail.block_hashmerkleroot,
           nonce: detail.block_nonce,
           version: detail.block_version,
           blockHeight: detail.block_height,
