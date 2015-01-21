@@ -99,10 +99,7 @@ Transactions.prototype.propagate = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  var rpc = this.rpc
-
-  // TODO: use batching
-  async.map(txHexs, rpc.sendRawTransaction.bind(rpc), function(err, results) {
+  utils.batchRpc(this.rpc, 'sendrawtransaction', txHexs, function(err, results) {
     if (err) return res.jsend.fail(err.message)
 
     return res.jsend.success(results)

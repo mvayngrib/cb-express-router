@@ -1,6 +1,32 @@
 var bitcoinjs = require('bitcoinjs-lib')
 var pg = require('pg')
 
+function batchRpc(rpc, command, params, callback) {
+  var commands = params.map(function(param) {
+    return {
+      method: command,
+      params: [param]
+    }
+  })
+
+  var failed = false
+  var results = []
+  rpc.cmd(commands, function(err, result) {
+    if (failed) return
+
+    results.push(result)
+
+    // short circuit error
+    if (err) {
+      failed = true
+      return callback(err)
+    }
+
+    if (results.length < params.length) return
+    return callback(null, results)
+  })
+}
+
 var __bindCache = {}
 function bindArguments(n) {
   if (n in __bindCache) return __bindCache[n]
@@ -67,6 +93,7 @@ function validateTransactionId(txId) {
 }
 
 module.exports = {
+  batchRpc: batchRpc,
   bindArguments: bindArguments,
   buildTransaction: buildTransaction,
   runQuery: runQuery,
