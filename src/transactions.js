@@ -9,12 +9,12 @@ var sql = {
   getOutputs: swig.compileFile('./src/sql/transactionOutputs.sql')
 }
 
-function Transactions(connString) {
+function Transactions(connString, rpc) {
   this.connString = connString
+  this.rpc = rpc
 }
 
 //latest: function(req, res) {
-//propagate: function(req, res) {
 //summary: function(req, res) {
 
 Transactions.prototype.get = function(req, res) {
@@ -86,6 +86,26 @@ Transactions.prototype.get = function(req, res) {
 
         return res.jsend.fail(e)
       }
+  })
+}
+
+Transactions.prototype.propagate = function(req, res) {
+  var txHexs = req.body.txHexs
+
+  try {
+    typeforce(['String'], txHexs)
+
+  } catch (e) {
+    return res.jsend.fail(e.message)
+  }
+
+  var rpc = this.rpc
+
+  // TODO: use batching
+  async.map(txHexs, rpc.sendRawTransaction.bind(rpc), function(err, results) {
+    if (err) return res.jsend.fail(err.message)
+
+    return res.jsend.success(results)
   })
 }
 
