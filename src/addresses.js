@@ -105,8 +105,8 @@ Addresses.prototype.transactions = function(req, res) {
     ], function(err, results) {
       if (err) return res.jsend.error(err.message)
 
-      var inputs = results[1]
-      var outputs = results[2]
+      var inputs = results[0]
+      var outputs = results[1]
 
       try {
         inputs.forEach(function(row) {
