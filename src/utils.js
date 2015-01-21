@@ -14,7 +14,7 @@ function bindArguments(n) {
 }
 
 function runQuery(connString, queryText, queryValues, callback) {
-  pg.connect(this.connString, function(err, client, free) {
+  pg.connect(connString, function(err, client, free) {
     if (err) return callback(err)
 
     client.query(queryText, queryValues, function(err, results) {
