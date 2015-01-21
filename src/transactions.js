@@ -104,8 +104,8 @@ Transactions.prototype.get = function(req, res) {
         }
       }))
 
-    } catch (err) {
-      return res.jsend.fail(err.message)
+    } catch (e) {
+      return res.jsend.fail(e.message)
     }
   })
 }
