@@ -32,7 +32,7 @@ function createApp(config) {
 
   var transactions = new Transactions(config.postgres, rpc)
   app.post('/transactions/get', transactions.get.bind(transactions))
-//  app.post('/transactions/latest', transactions.latest.bind(transactions))
+  app.post('/transactions/latest', transactions.latest.bind(transactions))
   app.post('/transactions/propagate', transactions.propagate.bind(transactions))
   app.post('/transactions/summary', transactions.summary.bind(transactions))
 

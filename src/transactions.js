@@ -14,9 +14,6 @@ function Transactions(connString, rpc) {
   this.rpc = rpc
 }
 
-//latest: function(req, res) {
-//summary: function(req, res) {
-
 Transactions.prototype.get = function(req, res) {
   var txIds = req.body.txIds
 
@@ -80,13 +77,16 @@ Transactions.prototype.get = function(req, res) {
           blockHeight: detail.block_height
         }
       }))
+    } catch (e) {
+      if (typeof e !== 'string') throw e
 
-      } catch (e) {
-        if (typeof e !== 'string') throw e
-
-        return res.jsend.fail(e)
-      }
+      return res.jsend.fail(e)
+    }
   })
+}
+
+Transactions.prototype.latest = function(req, res) {
+  return res.jsend.fail('TODO')
 }
 
 Transactions.prototype.propagate = function(req, res) {
@@ -173,12 +173,11 @@ Transactions.prototype.summary = function(req, res) {
           totalOutputValue: totalOutputValue
         }
       }))
+    } catch (e) {
+      if (typeof e !== 'string') throw e
 
-      } catch (e) {
-        if (typeof e !== 'string') throw e
-
-        return res.jsend.fail(e)
-      }
+      return res.jsend.fail(e)
+    }
   })
 }
 
