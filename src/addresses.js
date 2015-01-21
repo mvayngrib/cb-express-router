@@ -35,26 +35,7 @@ Addresses.prototype.summary = function(req, res) {
 
     var seen = {}
     results.forEach(function(row) {
-      var result
-
-      if (row.unconfirmed_balance === null) {
-        result = {
-          address: row.addr_bs58,
-          balance: row.confirmed_balance,
-          totalReceived: row.confirmed_received_amount,
-          txCount: row.confirmed_received_tx_count
-        }
-
-      } else {
-        result = {
-          address: row.addr_bs58,
-          balance: row.confirmed_balance + row.unconfirmed_balance,
-          totalReceived: row.confirmed_received_amount + row.unconfirmed_received_amount,
-          txCount: row.confirmed_received_tx_count + row.unconfirmed_received_tx_count
-        }
-      }
-
-      seen[row.addr_bs58] = result
+      seen[row.address] = row
     })
 
     return res.jsend.success(addresses.map(function(address) {
