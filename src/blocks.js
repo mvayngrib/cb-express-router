@@ -33,18 +33,7 @@ Blocks.prototype.latest = function(req, res) {
     if (err) return res.jsend.error(err.message)
 
     var latest = results.pop()
-
-    return res.jsend.success({
-      blockId: latest.block_hash,
-      prevBlockId: latest.prev_block_hash,
-      merkleRootHash: latest.block_hashmerkleroot,
-      nonce: latest.block_nonce,
-      version: latest.block_version,
-      blockHeight: latest.block_height,
-      blockSize: latest.block_bits,
-      timestamp: latest.block_timestamp,
-      txCount: latest.block_tx_count
-    })
+    return res.jsend.success(latest)
   })
 }
 
@@ -71,26 +60,14 @@ Blocks.prototype.summary = function(req, res) {
 
     var seen = {}
     results.forEach(function(result) {
-      seen[result.block_hash] = result
+      seen[result.blockId] = result
     })
 
     try {
       return res.jsend.success(blockIds.map(function(blockId) {
         if (!(blockId in seen)) throw blockId + ' not found'
 
-        var detail = seen[blockId]
-
-        return {
-          blockId: blockId,
-          prevBlockId: detail.prev_block_hash,
-          merkleRootHash: detail.block_hashmerkleroot,
-          nonce: detail.block_nonce,
-          version: detail.block_version,
-          blockHeight: detail.block_height,
-          blockSize: detail.block_bits,
-          timestamp: detail.block_timestamp,
-          txCount: detail.block_tx_count
-        }
+        return seen[blockId]
       }))
     } catch (e) {
       if (typeof e !== 'string') throw e
