@@ -20,7 +20,7 @@ function runQuery(connString, queryText, queryValues, callback) {
     client.query(queryText, queryValues, function(err, results) {
       free()
 
-      return callback(err, results.rows)
+      return callback(err, results && results.rows)
     })
   })
 }
