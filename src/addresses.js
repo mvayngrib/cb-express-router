@@ -110,20 +110,20 @@ Addresses.prototype.transactions = function(req, res) {
       try {
         inputs.forEach(function(row) {
           var txId = row.tx_hash
-          if (!(txId in seen)) throw new Error(txId + ' is weird')
+          if (!(txId in seen)) throw txId + ' is weird'
 
           seen[txId].inputs[row.txin_pos] = row
         })
 
         outputs.forEach(function(row) {
           var txId = row.tx_hash
-          if (!(txId in seen)) throw new Error(txId + ' is weird')
+          if (!(txId in seen)) throw txId + ' is weird'
 
           seen[txId].outputs[row.txout_pos] = row
         })
 
         return res.jsend.success(txIds.map(function(txId) {
-          if (!(txId in seen)) throw new Error(txId + ' not found')
+          if (!(txId in seen)) throw txId + ' not found'
 
           var detail = seen[txId]
           var txHex = utils.buildTransaction(detail).toHex()
@@ -137,7 +137,9 @@ Addresses.prototype.transactions = function(req, res) {
         }))
 
       } catch (e) {
-        return res.jsend.fail(e.message)
+        if (typeof e !== 'string') throw e
+
+        return res.jsend.fail(e)
       }
     })
   })
