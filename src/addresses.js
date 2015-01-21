@@ -79,10 +79,11 @@ Addresses.prototype.transactions = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
+  var connString = this.connString
   var bindArgs = utils.bindArguments(addresses.length)
   var query = sql.transactions({ addresses: bindArgs })
 
-  utils.runQuery(this.connString, query, addresses, function(err, results) {
+  utils.runQuery(connString, query, addresses, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
     var seen = {}
@@ -99,8 +100,8 @@ Addresses.prototype.transactions = function(req, res) {
     var queryOutputs = sql.transactionOutputs({ txIds: bindArgs2 })
 
     async.parallel([
-      utils.runQuery.bind(null, this.connString, queryInputs, txIds),
-      utils.runQuery.bind(null, this.connString, queryOutputs, txIds)
+      utils.runQuery.bind(null, connString, queryInputs, txIds),
+      utils.runQuery.bind(null, connString, queryOutputs, txIds)
     ], function(err, results) {
       if (err) return res.jsend.error(err.message)
 
