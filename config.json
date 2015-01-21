@@ -1,5 +1,11 @@
 {
   "network": "testnet",
   "port": 8080,
-  "postgres": ""
+  "postgres": "",
+  "rpc": {
+    "host": "",
+    "port": 18332,
+    "user": "",
+    "password": ""
+  }
 }
