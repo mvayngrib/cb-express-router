@@ -13,21 +13,16 @@ function Transactions(connString) {
   this.connString = connString
 }
 
-Transactions.prototype.__validateTxId = function(string) {
-  if (string.length !== 64) throw new Error(string + ' is not a valid txId')
-}
-
 //latest: function(req, res) {
 //propagate: function(req, res) {
 //summary: function(req, res) {
 
 Transactions.prototype.get = function(req, res) {
   var txIds = req.body.txIds
-  var self = this
 
   try {
     typeforce(['String'], txIds)
-    txIds.forEach(self.__validateTxId.bind(self))
+    txIds.forEach(utils.validateTransactionId)
 
   } catch (e) {
     return res.jsend.fail(e.message)

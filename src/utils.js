@@ -49,8 +49,27 @@ function runQuery(connString, queryText, queryValues, callback) {
   })
 }
 
+function validateAddress(networkStr, addressStr) {
+  var network = bitcoinjs.networks[networkStr]
+
+  try {
+    var address = bitcoinjs.Address.fromBase58Check(addressStr)
+
+    if (address.version !== network.pubKeyHash &&
+        address.version !== network.scriptHash) throw new Error('Bad network')
+  } catch(e) {
+    throw new Error(addressStr + ' is not a valid ' + networkStr + ' address')
+  }
+}
+
+function validateTransactionId(txId) {
+  if (txId.length !== 64) throw new Error(txId + ' is not a valid txId')
+}
+
 module.exports = {
   bindArguments: bindArguments,
   buildTransaction: buildTransaction,
-  runQuery: runQuery
+  runQuery: runQuery,
+  validateAddress: validateAddress,
+  validateTransactionId: validateTransactionId
 }

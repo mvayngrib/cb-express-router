@@ -1,38 +1,25 @@
-var bitcoinjs = require('bitcoinjs-lib')
+var async = require('async')
 var swig = require("swig")
 var typeforce = require('typeforce')
 var utils = require('./utils')
 
 var sql = {
   summary: swig.compileFile('./src/sql/addressSummary.sql'),
-//  transactions: swig.compileFile('./src/sql/addressTransactions.sql'),
+  transactions: swig.compileFile('./src/sql/addressTransactions.sql'),
   unspents: swig.compileFile('./src/sql/addressUnspents.sql')
 }
 
 function Addresses(connString, networkStr) {
   this.connString = connString
-  this.network = bitcoinjs.networks[networkStr]
   this.networkStr = networkStr
-}
-
-Addresses.prototype.__validateAddress = function(string) {
-  try {
-    var address = bitcoinjs.Address.fromBase58Check(string)
-
-    if (address.version !== this.network.pubKeyHash &&
-        address.version !== this.network.scriptHash) throw new Error('Bad network')
-  } catch(e) {
-    throw new Error(string + ' is not a valid ' + this.networkStr + ' address')
-  }
 }
 
 Addresses.prototype.summary = function(req, res) {
   var addresses = req.body.addresses
-  var self = this
 
   try {
     typeforce(['String'], addresses)
-    addresses.forEach(self.__validateAddress.bind(self))
+    addresses.forEach(utils.validateAddress.bind(null, this.networkStr))
 
   } catch (e) {
     return res.jsend.fail(e.message)
@@ -81,11 +68,10 @@ Addresses.prototype.summary = function(req, res) {
 
 Addresses.prototype.unspents = function(req, res) {
   var addresses = req.body.addresses
-  var self = this
 
   try {
     typeforce(['String'], addresses)
-    addresses.forEach(self.__validateAddress.bind(self))
+    addresses.forEach(utils.validateAddress.bind(null, this.networkStr))
 
   } catch (e) {
     return res.jsend.fail(e.message)
