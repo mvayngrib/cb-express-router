@@ -13,6 +13,16 @@ function Blocks(connString, rpc) {
 }
 
 Blocks.prototype.get = function(req, res) {
+  var blockIds = req.body.blockIds
+
+  try {
+    typeforce(['String'], blockIds)
+    blockIds.forEach(utils.validateBlockId)
+
+  } catch (e) {
+    return res.jsend.fail(e.message)
+  }
+
   return res.jsend.fail('TODO')
 }
 
@@ -47,7 +57,7 @@ Blocks.prototype.summary = function(req, res) {
 
   try {
     typeforce(['String'], blockIds)
-    blockIds.forEach(utils.validateblockId)
+    blockIds.forEach(utils.validateBlockId)
 
   } catch (e) {
     return res.jsend.fail(e.message)
@@ -61,7 +71,7 @@ Blocks.prototype.summary = function(req, res) {
 
     var seen = {}
     results.forEach(function(result) {
-      seen[result.tx_hash] = result
+      seen[result.block_hash] = result
     })
 
     try {
