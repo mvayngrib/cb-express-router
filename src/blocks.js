@@ -1,4 +1,3 @@
-var async = require('async')
 var swig = require("swig")
 var typeforce = require('typeforce')
 var utils = require('./utils')
@@ -73,4 +72,3 @@ Blocks.prototype.summary = function(req, res) {
 }
 
 module.exports = Blocks
-
