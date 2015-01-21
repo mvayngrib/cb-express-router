@@ -72,7 +72,7 @@ Addresses.prototype.transactions = function(req, res) {
       result.inputs = []
       result.outputs = []
 
-      seen[result.tx_hash] = result
+      seen[result.txId] = result
     })
 
     var txIds = Object.keys(seen)
@@ -91,17 +91,17 @@ Addresses.prototype.transactions = function(req, res) {
 
       try {
         inputs.forEach(function(row) {
-          var txId = row.tx_hash
+          var txId = row.txId
           if (!(txId in seen)) throw txId + ' is weird'
 
-          seen[txId].inputs[row.txin_pos] = row
+          seen[txId].inputs[row.n] = row
         })
 
         outputs.forEach(function(row) {
-          var txId = row.tx_hash
+          var txId = row.txId
           if (!(txId in seen)) throw txId + ' is weird'
 
-          seen[txId].outputs[row.txout_pos] = row
+          seen[txId].outputs[row.n] = row
         })
 
         return res.jsend.success(txIds.map(function(txId) {
@@ -113,8 +113,8 @@ Addresses.prototype.transactions = function(req, res) {
           return {
             txId: txId,
             txHex: txHex,
-            blockId: detail.block_hash,
-            blockHeight: detail.block_height
+            blockId: detail.blockId,
+            blockHeight: detail.blockHeight
           }
         }))
 
@@ -144,15 +144,7 @@ Addresses.prototype.unspents = function(req, res) {
   utils.runQuery(this.connString, query, addresses, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
-    return res.jsend.success(results.map(function(row) {
-      return {
-        txId: row.tx_hash,
-        confirmations: row.confirmations,
-        address: row.addr_bs58,
-        value: row.txout_value,
-        vout: row.txout_pos
-      }
-    }))
+    return res.jsend.success(results)
   })
 }
 
