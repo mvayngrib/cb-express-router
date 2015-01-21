@@ -1,11 +1,10 @@
 var async = require('async')
-var bitcoinjs = require('bitcoinjs-lib')
 var swig = require("swig")
 var typeforce = require('typeforce')
 var utils = require('./utils')
 
 var sql = {
-  getDetails: swig.compileFile('./src/sql/transactionDetails.sql'),
+  get: swig.compileFile('./src/sql/transactions.sql'),
   getInputs: swig.compileFile('./src/sql/transactionIns.sql'),
   getOutputs: swig.compileFile('./src/sql/transactionOuts.sql')
 }
@@ -35,12 +34,12 @@ Transactions.prototype.get = function(req, res) {
   }
 
   var bindArgs = utils.bindArguments(txIds.length)
-  var queryDetails = sql.getDetails({ txIds: bindArgs })
+  var query = sql.get({ txIds: bindArgs })
   var queryInputs = sql.getInputs({ txIds: bindArgs })
   var queryOutputs = sql.getOutputs({ txIds: bindArgs })
 
   async.parallel([
-    utils.runQuery.bind(null, this.connString, queryDetails, txIds),
+    utils.runQuery.bind(null, this.connString, query, txIds),
     utils.runQuery.bind(null, this.connString, queryInputs, txIds),
     utils.runQuery.bind(null, this.connString, queryOutputs, txIds)
   ], function(err, results) {
@@ -77,28 +76,11 @@ Transactions.prototype.get = function(req, res) {
         if (!(txId in seen)) throw new Error(txId + ' not found')
 
         var detail = seen[txId]
-        var tx = new bitcoinjs.Transaction()
-
-        tx.locktime = parseInt(detail.tx_locktime)
-        tx.version = parseInt(detail.tx_version)
-
-        detail.inputs.forEach(function(txIn) {
-          var index = parseInt(txIn.prev_txout_pos)
-          var script = bitcoinjs.Script.fromHex(txIn.txin_scriptsig)
-          var sequence = parseInt(txIn.txin_sequence)
-          var txId = txIn.prev_tx_hash
-
-          tx.addInput(txId, index, sequence, script)
-        })
-
-        detail.outputs.forEach(function(txOut) {
-          var script = bitcoinjs.Script.fromHex(txOut.txout_scriptpubkey)
-          tx.addOutput(script, parseInt(txOut.txout_value))
-        })
+        var txHex = utils.buildTransaction(detail).toHex()
 
         return {
           txId: txId,
-          txHex: tx.toHex(),
+          txHex: txHex,
           blockId: detail.block_hash,
           blockHeight: detail.block_height
         }
