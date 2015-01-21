@@ -45,7 +45,7 @@ Addresses.prototype.summary = function(req, res) {
     if (err) return res.jsend.error(err.message)
 
     var seen = {}
-    results.rows.forEach(function(row) {
+    results.forEach(function(row) {
       var result
 
       if (row.unconfirmed_balance === null) {
@@ -97,7 +97,7 @@ Addresses.prototype.unspents = function(req, res) {
   utils.runQuery(this.connString, query, addresses, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
-    return res.jsend.success(results.rows.map(function(row) {
+    return res.jsend.success(results.map(function(row) {
       return {
         txId: row.tx_hash,
         confirmations: row.confirmations,

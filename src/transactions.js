@@ -48,9 +48,9 @@ Transactions.prototype.get = function(req, res) {
   ], function(err, results) {
     if (err) return res.jsend.error(err.message)
 
-    var details = results[0].rows
-    var inputs = results[1].rows
-    var outputs = results[2].rows
+    var details = results[0]
+    var inputs = results[1]
+    var outputs = results[2]
 
     var seen = {}
     details.forEach(function(detail) {
