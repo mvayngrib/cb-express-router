@@ -88,6 +88,10 @@ function validateAddress(networkStr, addressStr) {
   }
 }
 
+function validateBlockId(blockId) {
+  if (blockId.length !== 64) throw new Error(blockId + ' is not a valid blockId')
+}
+
 function validateTransactionId(txId) {
   if (txId.length !== 64) throw new Error(txId + ' is not a valid txId')
 }
@@ -98,5 +102,6 @@ module.exports = {
   buildTransaction: buildTransaction,
   runQuery: runQuery,
   validateAddress: validateAddress,
+  validateBlockId: validateBlockId,
   validateTransactionId: validateTransactionId
 }

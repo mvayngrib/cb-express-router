@@ -4,7 +4,7 @@ var bodyParser = require('body-parser')
 var jsend = require('jsend')
 
 var Addresses = require('./addresses')
-//var Blocks = require('./blocks')
+var Blocks = require('./blocks')
 var Transactions = require('./transactions')
 
 function createApp(config) {
@@ -25,10 +25,10 @@ function createApp(config) {
   app.post('/addresses/transactions', addresses.transactions.bind(addresses))
   app.post('/addresses/unspents', addresses.unspents.bind(addresses))
 
-//    var blocks = new Blocks(config.postgres, rpc)
-//  app.post('/blocks/get', blocks.get.bind(blocks))
-//  app.post('/blocks/latest', blocks.latest.bind(blocks))
-//  app.post('/blocks/propagate', blocks.propagate.bind(blocks))
+  var blocks = new Blocks(config.postgres, rpc)
+  app.post('/blocks/get', blocks.get.bind(blocks))
+  app.post('/blocks/latest', blocks.latest.bind(blocks))
+  app.post('/blocks/propagate', blocks.propagate.bind(blocks))
 
   var transactions = new Transactions(config.postgres, rpc)
   app.post('/transactions/get', transactions.get.bind(transactions))
