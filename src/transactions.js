@@ -10,10 +10,8 @@ var sql = {
   getOutputs: swig.compileFile('./src/sql/transactionOuts.sql')
 }
 
-function Transactions(connString, networkStr) {
+function Transactions(connString) {
   this.connString = connString
-  this.network = bitcoinjs.networks[networkStr]
-  this.networkStr = networkStr
 }
 
 Transactions.prototype.__validateTxId = function(string) {
