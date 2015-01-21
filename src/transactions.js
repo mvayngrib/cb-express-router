@@ -1,12 +1,11 @@
 var async = require('async')
 var bitcoinjs = require('bitcoinjs-lib')
-var pg = require('pg')
 var swig = require("swig")
 var typeforce = require('typeforce')
 var utils = require('./utils')
 
 var sql = {
-  getDetail: swig.compileFile('./src/sql/transactionDetail.sql'),
+  getDetails: swig.compileFile('./src/sql/transactionDetails.sql'),
   getInputs: swig.compileFile('./src/sql/transactionIns.sql'),
   getOutputs: swig.compileFile('./src/sql/transactionOuts.sql')
 }
@@ -38,84 +37,78 @@ Transactions.prototype.get = function(req, res) {
   }
 
   var bindArgs = utils.bindArguments(txIds.length)
-  var queryDetail = sql.getDetail({ txIds: bindArgs })
+  var queryDetails = sql.getDetails({ txIds: bindArgs })
   var queryInputs = sql.getInputs({ txIds: bindArgs })
   var queryOutputs = sql.getOutputs({ txIds: bindArgs })
 
-  pg.connect(this.connString, function(err, client, free) {
+  async.parallel([
+    utils.runQuery.bind(null, this.connString, queryDetails, txIds),
+    utils.runQuery.bind(null, this.connString, queryInputs, txIds),
+    utils.runQuery.bind(null, this.connString, queryOutputs, txIds)
+  ], function(err, results) {
     if (err) return res.jsend.error(err.message)
 
-    async.parallel([
-      client.query.bind(client, queryDetail, txIds),
-      client.query.bind(client, queryInputs, txIds),
-      client.query.bind(client, queryOutputs, txIds)
-    ], function(err, results) {
-      free()
+    var details = results[0].rows
+    var inputs = results[1].rows
+    var outputs = results[2].rows
 
-      if (err) return res.jsend.error(err.message)
+    var seen = {}
+    details.forEach(function(detail) {
+      detail.inputs = []
+      detail.outputs = []
 
-      var details = results[0].rows
-      var inputs = results[1].rows
-      var outputs = results[2].rows
+      seen[detail.tx_hash] = detail
+    })
 
-      var seen = {}
-      details.forEach(function(detail) {
-        detail.inputs = []
-        detail.outputs = []
+    try {
+      inputs.forEach(function(row) {
+        var txId = row.tx_hash
+        if (!(txId in seen)) throw new Error(txId + ' is weird')
 
-        seen[detail.tx_hash] = detail
+        seen[txId].inputs[row.txin_pos] = row
       })
 
-      try {
-        inputs.forEach(function(row) {
-          var txId = row.tx_hash
-          if (!(txId in seen)) throw new Error(txId + ' is weird')
+      outputs.forEach(function(row) {
+        var txId = row.tx_hash
+        if (!(txId in seen)) throw new Error(txId + ' is weird')
 
-          seen[txId].inputs[row.txin_pos] = row
+        seen[txId].outputs[row.txout_pos] = row
+      })
+
+      return res.jsend.success(txIds.map(function(txId) {
+        if (!(txId in seen)) throw new Error(txId + ' not found')
+
+        var detail = seen[txId]
+        var tx = new bitcoinjs.Transaction()
+
+        tx.locktime = parseInt(detail.tx_locktime)
+        tx.version = parseInt(detail.tx_version)
+
+        detail.inputs.forEach(function(txIn) {
+          var index = parseInt(txIn.prev_txout_pos)
+          var script = bitcoinjs.Script.fromHex(txIn.txin_scriptsig)
+          var sequence = parseInt(txIn.txin_sequence)
+          var txId = txIn.prev_tx_hash
+
+          tx.addInput(txId, index, sequence, script)
         })
 
-        outputs.forEach(function(row) {
-          var txId = row.tx_hash
-          if (!(txId in seen)) throw new Error(txId + ' is weird')
-
-          seen[txId].outputs[row.txout_pos] = row
+        detail.outputs.forEach(function(txOut) {
+          var script = bitcoinjs.Script.fromHex(txOut.txout_scriptpubkey)
+          tx.addOutput(script, parseInt(txOut.txout_value))
         })
 
-        return res.jsend.success(txIds.map(function(txId) {
-          if (!(txId in seen)) throw new Error(txId + ' not found')
+        return {
+          txId: txId,
+          txHex: tx.toHex(),
+          blockId: detail.block_hash,
+          blockHeight: detail.block_height
+        }
+      }))
 
-          var detail = seen[txId]
-          var tx = new bitcoinjs.Transaction()
-
-          tx.locktime = parseInt(detail.tx_locktime)
-          tx.version = parseInt(detail.tx_version)
-
-          detail.inputs.forEach(function(txIn) {
-            var index = parseInt(txIn.prev_txout_pos)
-            var script = bitcoinjs.Script.fromHex(txIn.txin_scriptsig)
-            var sequence = parseInt(txIn.txin_sequence)
-            var txId = txIn.prev_tx_hash
-
-            tx.addInput(txId, index, sequence, script)
-          })
-
-          detail.outputs.forEach(function(txOut) {
-            var script = bitcoinjs.Script.fromHex(txOut.txout_scriptpubkey)
-            tx.addOutput(script, parseInt(txOut.txout_value))
-          })
-
-          return {
-            txId: txId,
-            txHex: tx.toHex(),
-            blockId: detail.block_hash,
-            blockHeight: detail.block_height
-          }
-        }))
-
-      } catch (err) {
-        return res.jsend.fail(err.message)
-      }
-    })
+    } catch (err) {
+      return res.jsend.fail(err.message)
+    }
   })
 }
 
