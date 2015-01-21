@@ -29,6 +29,7 @@ function createApp(config) {
   app.post('/blocks/get', blocks.get.bind(blocks))
   app.post('/blocks/latest', blocks.latest.bind(blocks))
   app.post('/blocks/propagate', blocks.propagate.bind(blocks))
+  app.post('/blocks/summary', blocks.summary.bind(blocks))
 
   var transactions = new Transactions(config.postgres, rpc)
   app.post('/transactions/get', transactions.get.bind(transactions))
