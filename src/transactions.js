@@ -5,8 +5,8 @@ var utils = require('./utils')
 
 var sql = {
   get: swig.compileFile('./src/sql/transactions.sql'),
-  getInputs: swig.compileFile('./src/sql/transactionIns.sql'),
-  getOutputs: swig.compileFile('./src/sql/transactionOuts.sql')
+  getInputs: swig.compileFile('./src/sql/transactionInputs.sql'),
+  getOutputs: swig.compileFile('./src/sql/transactionOutputs.sql')
 }
 
 function Transactions(connString) {
