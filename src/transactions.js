@@ -46,6 +46,7 @@ Transactions.prototype.get = function(req, res) {
 
     var seen = {}
     details.forEach(function(detail) {
+      detail.blockHeight = parseInt(detail.blockHeight)
       detail.inputs = []
       detail.outputs = []
 
@@ -57,12 +58,18 @@ Transactions.prototype.get = function(req, res) {
         var txId = row.txId
         if (!(txId in seen)) throw txId + ' is weird'
 
+        row.value = parseInt(row.value)
+        row.vout = parseInt(row.vout)
+        row.sequence = parseInt(row.sequence)
+
         seen[txId].inputs[row.n] = row
       })
 
       outputs.forEach(function(row) {
         var txId = row.txId
         if (!(txId in seen)) throw txId + ' is weird'
+
+        row.value = parseInt(row.value)
 
         seen[txId].outputs[row.n] = row
       })
@@ -112,6 +119,7 @@ Transactions.prototype.latest = function(req, res) {
 
       var seen = {}
       details.forEach(function(detail) {
+        detail.blockHeight = parseInt(detail.blockHeight)
         detail.inputs = []
         detail.outputs = []
 
@@ -123,12 +131,18 @@ Transactions.prototype.latest = function(req, res) {
           var txId = row.txId
           if (!(txId in seen)) throw txId + ' is weird'
 
+          row.value = parseInt(row.value)
+          row.vout = parseInt(row.vout)
+          row.sequence = parseInt(row.sequence)
+
           seen[txId].inputs[row.n] = row
         })
 
         outputs.forEach(function(row) {
           var txId = row.txId
           if (!(txId in seen)) throw txId + ' is weird'
+
+          row.value = parseInt(row.value)
 
           seen[txId].outputs[row.n] = row
         })
@@ -203,6 +217,7 @@ Transactions.prototype.summary = function(req, res) {
 
     var seen = {}
     details.forEach(function(detail) {
+      detail.blockHeight = parseInt(detail.blockHeight)
       detail.inputs = []
       detail.outputs = []
 
@@ -214,12 +229,18 @@ Transactions.prototype.summary = function(req, res) {
         var txId = row.txId
         if (!(txId in seen)) throw txId + ' is weird'
 
+        row.value = parseInt(row.value)
+        row.vout = parseInt(row.vout)
+        row.sequence = parseInt(row.sequence)
+
         seen[txId].inputs[row.n] = row
       })
 
       outputs.forEach(function(row) {
         var txId = row.txId
         if (!(txId in seen)) throw txId + ' is weird'
+
+        row.value = parseInt(row.value)
 
         seen[txId].outputs[row.n] = row
       })
@@ -228,8 +249,8 @@ Transactions.prototype.summary = function(req, res) {
         if (!(txId in seen)) throw txId + ' not found'
 
         var detail = seen[txId]
-        var totalInputValue = detail.inputs.reduce(function(a, x) { return a + parseInt(x.value) }, 0)
-        var totalOutputValue = detail.outputs.reduce(function(a, x) { return a + parseInt(x.value) }, 0)
+        var totalInputValue = detail.inputs.reduce(function(a, x) { return a + x.value }, 0)
+        var totalOutputValue = detail.outputs.reduce(function(a, x) { return a + x.value }, 0)
 
         return {
           txId: txId,

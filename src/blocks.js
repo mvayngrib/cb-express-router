@@ -35,6 +35,13 @@ Blocks.prototype.latest = function(req, res) {
     if (err) return res.jsend.error(err.message)
 
     var latest = results.pop()
+    latest.nonce = parseInt(latest.nonce)
+    latest.version = parseInt(latest.version)
+    latest.blockHeight = parseInt(latest.blockHeight)
+    latest.blockSize = parseInt(latest.blockSize)
+    latest.timestamp = parseInt(latest.timestamp)
+    latest.txCount = parseInt(latest.txCount)
+
     return res.jsend.success(latest)
   })
 }
@@ -75,6 +82,13 @@ Blocks.prototype.summary = function(req, res) {
 
     var seen = {}
     results.forEach(function(result) {
+      result.nonce = parseInt(result.nonce)
+      result.version = parseInt(result.version)
+      result.blockHeight = parseInt(result.blockHeight)
+      result.blockSize = parseInt(result.blockSize)
+      result.timestamp = parseInt(result.timestamp)
+      result.txCount = parseInt(result.txCount)
+
       seen[result.blockId] = result
     })
 

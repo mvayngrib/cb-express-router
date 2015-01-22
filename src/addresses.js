@@ -37,6 +37,10 @@ Addresses.prototype.summary = function(req, res) {
 
     var seen = {}
     results.forEach(function(row) {
+      row.balance = parseInt(row.balance)
+      row.totalReceived = parseInt(row.totalReceived)
+      row.txCount = parseInt(row.txCount)
+
       seen[row.address] = row
     })
 
@@ -68,15 +72,16 @@ Addresses.prototype.transactions = function(req, res) {
   var bindArgs = utils.bindArguments(addresses.length)
   var query = sql.transactions({ addresses: bindArgs })
 
-  utils.runQuery(connString, query, addresses, function(err, results) {
+  utils.runQuery(connString, query, addresses, function(err, details) {
     if (err) return res.jsend.error(err.message)
 
     var seen = {}
-    results.forEach(function(result) {
-      result.inputs = []
-      result.outputs = []
+    details.forEach(function(detail) {
+      detail.blockHeight = parseInt(detail.blockHeight)
+      detail.inputs = []
+      detail.outputs = []
 
-      seen[result.txId] = result
+      seen[detail.txId] = detail
     })
 
     var txIds = Object.keys(seen)
@@ -98,12 +103,18 @@ Addresses.prototype.transactions = function(req, res) {
           var txId = row.txId
           if (!(txId in seen)) throw txId + ' is weird'
 
+          row.value = parseInt(row.value)
+          row.vout = parseInt(row.vout)
+          row.sequence = parseInt(row.sequence)
+
           seen[txId].inputs[row.n] = row
         })
 
         outputs.forEach(function(row) {
           var txId = row.txId
           if (!(txId in seen)) throw txId + ' is weird'
+
+          row.value = parseInt(row.value)
 
           seen[txId].outputs[row.n] = row
         })
@@ -150,7 +161,13 @@ Addresses.prototype.unspents = function(req, res) {
   utils.runQuery(this.connString, query, addresses, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
-    return res.jsend.success(results)
+    return res.jsend.success(results.map(function(result) {
+      result.confirmations = parseInt(result.confirmations)
+      result.value = parseInt(result.value)
+      result.vout = parseInt(result.vout)
+
+      return result
+    }))
   })
 }
 
