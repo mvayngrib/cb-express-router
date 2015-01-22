@@ -37,16 +37,16 @@ function timeSince(date) {
     var years = Math.floor(seconds / 31536000)
     if (years) str += years + " Years "
 
-    var months = Math.floor(seconds / 2592000)
+    var months = Math.floor(seconds / 2592000) % 12
     if (months) str += months + " Months "
 
-    var days = Math.floor(seconds / 86400)
+    var days = Math.floor(seconds / 86400) % 365
     if (days) str += days + " Days "
 
-    var hours = Math.floor(seconds / 3600)
+    var hours = Math.floor(seconds / 3600) % 24
     if (hours) str += hours + " Hours "
 
-    var minutes = Math.floor(seconds / 60)
+    var minutes = Math.floor(seconds / 60) % 60
     if (minutes) str += minutes + " Minutes "
 
     seconds = seconds % 60
