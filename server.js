@@ -25,6 +25,9 @@ app.use(cors())
 // our custom api
 app.use(api)
 
+// otherwise static file server
+app.use(express.static(__dirname + '/public'));
+
 ////////////////////////////////////////////////////////
 
 var server
