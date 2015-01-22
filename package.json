@@ -21,9 +21,5 @@
     "pg": "^4.2.0",
     "swig": "^1.4.2",
     "typeforce": "^0.1.0"
-  },
-  "devDependencies": {
-    "superagent": "^0.21.0",
-    "supervisor": "^0.6.0"
   }
 }

@@ -1,1 +1,1 @@
-web: ./node_modules/.bin/supervisor server.js
+web: node server.js
