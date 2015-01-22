@@ -12,3 +12,8 @@ It would be ideal to add SQL bindings to an insight server.
 ## tests
 
 Currently there are no localized tests.  You can check its results and conformity against https://github.com/dcousens/cb-node however, as it is quite thorough.
+
+
+## example
+
+See https://common-blockchain.herokuapp.com/ for a live heroku server as an example.
