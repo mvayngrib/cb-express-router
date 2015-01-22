@@ -25,6 +25,8 @@ Transactions.prototype.get = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
+  if (txIds.length === 0) return res.jsend.success([])
+
   var bindArgs = utils.bindArguments(txIds.length)
   var query = sql.get({ txIds: bindArgs })
   var queryInputs = sql.getInputs({ txIds: bindArgs })
@@ -99,6 +101,8 @@ Transactions.prototype.propagate = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
+  if (txHexs.length === 0) return res.jsend.success([])
+
   utils.batchRpc(this.rpc, 'sendrawtransaction', txHexs, function(err, results) {
     if (err) return res.jsend.fail(err.message)
 
@@ -116,6 +120,8 @@ Transactions.prototype.summary = function(req, res) {
   } catch (e) {
     return res.jsend.fail(e.message)
   }
+
+  if (txIds.length === 0) return res.jsend.success([])
 
   var bindArgs = utils.bindArguments(txIds.length)
   var query = sql.get({ txIds: bindArgs })

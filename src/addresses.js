@@ -27,6 +27,8 @@ Addresses.prototype.summary = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
+  if (addresses.length === 0) return res.jsend.success([])
+
   var bindArgs = utils.bindArguments(addresses.length)
   var query = sql.summary({ addresses: bindArgs })
 
@@ -59,6 +61,8 @@ Addresses.prototype.transactions = function(req, res) {
   } catch (e) {
     return res.jsend.fail(e.message)
   }
+
+  if (addresses.length === 0) return res.jsend.success([])
 
   var connString = this.connString
   var bindArgs = utils.bindArguments(addresses.length)
@@ -137,6 +141,8 @@ Addresses.prototype.unspents = function(req, res) {
   } catch (e) {
     return res.jsend.fail(e.message)
   }
+
+  if (addresses.length === 0) return res.jsend.success([])
 
   var bindArgs = utils.bindArguments(addresses.length)
   var query = sql.unspents({ addresses: bindArgs })

@@ -23,6 +23,8 @@ Blocks.prototype.get = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
+  if (blockIds.length === 0) return res.jsend.success([])
+
   return res.jsend.fail('TODO')
 }
 
@@ -38,6 +40,17 @@ Blocks.prototype.latest = function(req, res) {
 }
 
 Blocks.prototype.propagate = function(req, res) {
+  var blockHexs = req.body.blockHexs
+
+  try {
+    typeforce(['String'], blockHexs)
+
+  } catch (e) {
+    return res.jsend.fail(e.message)
+  }
+
+  if (blockHexs.length === 0) return res.jsend.success([])
+
   return res.jsend.fail('TODO')
 }
 
@@ -51,6 +64,8 @@ Blocks.prototype.summary = function(req, res) {
   } catch (e) {
     return res.jsend.fail(e.message)
   }
+
+  if (blockIds.length === 0) return res.jsend.success([])
 
   var bindArgs = utils.bindArguments(blockIds.length)
   var query = sql.get({ blockIds: bindArgs })
