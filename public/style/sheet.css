@@ -7,13 +7,18 @@ body {
 	background-color: rgb(48, 48, 64);
 	color: white;
 	font-family: Trebuchet MS, Tahoma, Arial, sans-serif;
-	font-size: 24px;
+	font-size: 14px;
 	font-weight: normal;
 }
+h1 {
+	/*color: #333;*/
+	font-weight: bold;
+	letter-spacing: -0.05em;
+	text-align: center;
+}
 .wrapper {
-
 	margin: 10% auto;
-	max-width: 660px;
+	max-width: 700px;
 	padding-left: 20px;
 	padding-right: 20px;
 }
@@ -35,19 +40,27 @@ body {
 .list-item {
 	padding: 20px;
 }
+.label-item {
+	color: #aaa;
+}
 .list-item:nth-child(odd) {
 	background-color: rgba(255,255,255,0.1);
 }
 .label-item {
 	text-align: right;
 }
+@media only screen and (min-width: 620px) {
+	body {
+		font-size: 24px;
+	}
+}
 
 /* nice styles */
 
 .nice {
-	background-color: #fafafa;
+	background-color: #f3f3f3;
 	color: #333;
-	font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+	/*font-family: Helvetica Neue, Helvetica, Arial, sans-serif;*/
 }
 .nice .box {
 	background-color: white;
