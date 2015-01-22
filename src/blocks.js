@@ -25,7 +25,42 @@ Blocks.prototype.get = function(req, res) {
 
   if (blockIds.length === 0) return res.jsend.success([])
 
-  return res.jsend.fail('TODO')
+  var bindArgs = utils.bindArguments(blockIds.length)
+  var query = sql.get({ blockIds: bindArgs })
+
+  utils.runQuery(this.connString, query, blockIds, function(err, results) {
+    if (err) return res.jsend.error(err.message)
+
+    var seen = {}
+    results.forEach(function(result) {
+      result.nonce = parseInt(result.nonce)
+      result.version = parseInt(result.version)
+      result.blockHeight = parseInt(result.blockHeight)
+      result.blockSize = parseInt(result.blockSize)
+      result.timestamp = parseInt(result.timestamp)
+      result.txCount = parseInt(result.txCount)
+
+      seen[result.blockId] = result
+    })
+
+    try {
+      return res.jsend.success(blockIds.map(function(blockId) {
+        if (!(blockId in seen)) throw blockId + ' not found'
+
+        var detail = seen[blockId]
+        var blockHex = utils.buildBlock(detail).toHex()
+
+        return {
+          blockId: blockId,
+          blockHex: blockHex
+        }
+      }))
+    } catch (e) {
+      if (typeof e !== 'string') throw e
+
+      return res.jsend.fail(e)
+    }
+  })
 }
 
 Blocks.prototype.latest = function(req, res) {

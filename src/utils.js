@@ -40,6 +40,19 @@ function bindArguments(n) {
   return args
 }
 
+function buildBlock(detail) {
+  var block = new bitcoinjs.Block()
+
+  block.version = detail.version
+  block.prevHash = bitcoinjs.bufferutils.reverse(new Buffer(detail.prevBlockId, 'hex'))
+  block.merkleRoot = new Buffer(detail.merkleRootHash, 'hex')
+  block.timestamp = detail.timestamp
+  block.bits = detail.blockSize
+  block.nonce = detail.nonce
+
+  return block
+}
+
 function buildTransaction(detail) {
   var tx = new bitcoinjs.Transaction()
 
@@ -101,6 +114,7 @@ function validateTransactionId(txId) {
 module.exports = {
   batchRpc: batchRpc,
   bindArguments: bindArguments,
+  buildBlock: buildBlock,
   buildTransaction: buildTransaction,
   runQuery: runQuery,
   validateAddress: validateAddress,
