@@ -45,7 +45,7 @@ function buildBlock(detail) {
 
   block.version = detail.version
   block.prevHash = bitcoinjs.bufferutils.reverse(new Buffer(detail.prevBlockId, 'hex'))
-  block.merkleRoot = new Buffer(detail.merkleRootHash, 'hex')
+  block.merkleRoot = bitcoinjs.bufferutils.reverse(new Buffer(detail.merkleRootHash, 'hex'))
   block.timestamp = detail.timestamp
   block.bits = detail.blockSize
   block.nonce = detail.nonce
