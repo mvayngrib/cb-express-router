@@ -20,7 +20,6 @@ function createApp(config) {
   // request counter
   app.use(function(req, res, next) {
     app.requestCount += 1
-
     next()
   })
 
@@ -44,6 +43,12 @@ function createApp(config) {
   app.post('/transactions/latest', transactions.latest.bind(transactions))
   app.post('/transactions/propagate', transactions.propagate.bind(transactions))
   app.post('/transactions/summary', transactions.summary.bind(transactions))
+
+  // request counter (ignore non API requests)
+  app.use(function(req, res, next) {
+    app.requestCount -= 1
+    next()
+  })
 
   return app
 }
