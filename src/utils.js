@@ -43,21 +43,21 @@ function bindArguments(n) {
 function buildTransaction(detail) {
   var tx = new bitcoinjs.Transaction()
 
-  tx.locktime = parseInt(detail.locktime)
-  tx.version = parseInt(detail.version)
+  tx.locktime = detail.locktime
+  tx.version = detail.version
 
   detail.inputs.forEach(function(txIn) {
     var txId = txIn.prevTxId
-    var vout = parseInt(txIn.vout)
+    var vout = txIn.vout
     var script = bitcoinjs.Script.fromHex(txIn.scriptSig)
-    var sequence = parseInt(txIn.sequence)
+    var sequence = txIn.sequence
 
     tx.addInput(txId, vout, sequence, script)
   })
 
   detail.outputs.forEach(function(txOut) {
     var script = bitcoinjs.Script.fromHex(txOut.scriptPubKey)
-    var value = parseInt(txOut.value)
+    var value = txOut.value
 
     tx.addOutput(script, value)
   })
