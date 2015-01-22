@@ -1,0 +1,75 @@
+* {
+	-webkit-box-sizing: border-box;
+	   -moz-box-sizing: border-box;
+			box-sizing: border-box;
+}
+body {
+	background-color: rgb(48, 48, 64);
+	color: white;
+	font-family: Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size: 24px;
+	font-weight: normal;
+}
+.wrapper {
+
+	margin: 10% auto;
+	max-width: 660px;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+.box {
+	background-color: rgba(255,255,255,0.1);
+	box-shadow: 0 1px 8px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+	border-radius: 3px;
+	overflow: hidden;
+}
+.col {
+	float: left;
+	width: 50%;
+}
+.list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.list-item {
+	padding: 20px;
+}
+.list-item:nth-child(odd) {
+	background-color: rgba(255,255,255,0.1);
+}
+.label-item {
+	text-align: right;
+}
+
+/* nice styles */
+
+.nice {
+	background-color: #fafafa;
+	color: #333;
+	font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+}
+.nice .box {
+	background-color: white;
+	box-shadow: 0 1px 8px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
+	/*padding: 10px 0;*/
+}
+.nice .label-item {
+	color: #666;
+	font-weight: 300;
+}
+.nice .output-item {
+	font-weight: 500;
+}
+.nice .list-item + .list-item {
+	border-top: 1px solid #eee;
+}
+	
+
+
+
+
+
+
+
+
