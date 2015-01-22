@@ -6,7 +6,8 @@ var utils = require('./utils')
 var sql = {
   get: swig.compileFile('./src/sql/transactions.sql'),
   getInputs: swig.compileFile('./src/sql/transactionInputs.sql'),
-  getOutputs: swig.compileFile('./src/sql/transactionOutputs.sql')
+  getOutputs: swig.compileFile('./src/sql/transactionOutputs.sql'),
+//  latest: swig.compileFile('./src/sql/transactionsLatest.sql')
 }
 
 function Transactions(connString, rpc) {
@@ -89,6 +90,15 @@ Transactions.prototype.get = function(req, res) {
 
 Transactions.prototype.latest = function(req, res) {
   return res.jsend.fail('TODO')
+
+//  var query = sql.latest({ limit: 1 })
+//
+//  utils.runQuery(this.connString, query, [], function(err, results) {
+//    if (err) return res.jsend.error(err.message)
+//
+//    var latest = results.pop()
+//    return res.jsend.success(latest)
+//  })
 }
 
 Transactions.prototype.propagate = function(req, res) {
