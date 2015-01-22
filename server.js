@@ -2,6 +2,7 @@ var config = require('./config')
 var cors = require('cors')
 var express = require('express')
 var morgan = require('morgan')
+var swig = require('swig')
 
 var createApp = require('./src')
 
@@ -25,7 +26,46 @@ app.use(cors())
 // our custom api
 app.use(api)
 
-// otherwise static file server
+////////////////////////////////////////////////////////
+
+var startTime = new Date()
+
+function timeSince(date) {
+    var str = ""
+    var seconds = Math.floor((new Date() - date) / 1000)
+
+    var years = Math.floor(seconds / 31536000)
+    if (years) str += years + " Years "
+
+    var months = Math.floor(seconds / 2592000)
+    if (months) str += months + " Months "
+
+    var days = Math.floor(seconds / 86400)
+    if (days) str += days + " Days "
+
+    var hours = Math.floor(seconds / 3600)
+    if (hours) str += hours + " Hours "
+
+    var minutes = Math.floor(seconds / 60)
+    if (minutes) str += minutes + " Minutes "
+
+    seconds = seconds % 60
+    if (seconds) str += seconds + " Seconds"
+
+    return str
+}
+
+app.engine('html', swig.renderFile)
+app.set('view engine', 'html')
+app.set('views', __dirname + '/views')
+app.get('/', function(req, res) {
+  res.render('index', {
+    uptime: timeSince(startTime),
+    requests: api.requestCount
+  })
+})
+
+// otherwise serve statically
 app.use(express.static(__dirname + '/public'));
 
 ////////////////////////////////////////////////////////

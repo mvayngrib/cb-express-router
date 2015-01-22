@@ -9,12 +9,20 @@ var Transactions = require('./transactions')
 
 function createApp(config) {
   var app = express()
+  app.requestCount = 0
 
   // parse application/json
   app.use(bodyParser.json())
 
   // jsend
   app.use(jsend.middleware)
+
+  // request counter
+  app.use(function(req, res, next) {
+    app.requestCount += 1
+
+    next()
+  })
 
   // rpc api
   var rpc = new bitcoin.Client(config.rpc)
