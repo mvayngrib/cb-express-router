@@ -31,28 +31,28 @@ app.use(api)
 var startTime = new Date()
 
 function timeSince(date) {
-    var str = ""
-    var seconds = Math.floor((new Date() - date) / 1000)
+  var str = ""
+  var seconds = Math.floor((new Date() - date) / 1000)
 
-    var years = Math.floor(seconds / 31536000)
-    if (years) str += years + " Years "
+  var years = Math.floor(seconds / 31536000)
+  if (years) str += years + " Years "
 
-    var months = Math.floor(seconds / 2592000) % 12
-    if (months) str += months + " Months "
+  var months = Math.floor(seconds / 2592000) % 12
+  if (months) str += months + " Months "
 
-    var days = Math.floor(seconds / 86400) % 365
-    if (days) str += days + " Days "
+  var days = Math.floor(seconds / 86400) % 365
+  if (days) str += days + " Days "
 
-    var hours = Math.floor(seconds / 3600) % 24
-    if (hours) str += hours + " Hours "
+  var hours = Math.floor(seconds / 3600) % 24
+  if (hours) str += hours + " Hours "
 
-    var minutes = Math.floor(seconds / 60) % 60
-    if (minutes) str += minutes + " Minutes "
+  var minutes = Math.floor(seconds / 60) % 60
+  if (minutes) str += minutes + " Minutes "
 
-    seconds = seconds % 60
-    if (seconds) str += seconds + " Seconds"
+  seconds = seconds % 60
+  if (seconds) str += seconds + " Seconds"
 
-    return str
+  return str
 }
 
 app.engine('html', swig.renderFile)
