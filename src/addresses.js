@@ -85,6 +85,8 @@ Addresses.prototype.transactions = function(req, res) {
     })
 
     var txIds = Object.keys(seen)
+    if (txIds.length === 0) return res.jsend.success([])
+
     var bindArgs2 = utils.bindArguments(txIds.length)
     var queryInputs = sql.transactionInputs({ txIds: bindArgs2 })
     var queryOutputs = sql.transactionOutputs({ txIds: bindArgs2 })
