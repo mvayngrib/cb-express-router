@@ -18,7 +18,7 @@ FULL JOIN (
   WHERE addr_bs58 = {{address|safe}}
 ) As unconfirmed
 USING (addr_bs58)
-  {% if loop.last !== true %}
-    UNION ALL
-  {% endif %}
+{% if loop.last !== true %}
+UNION ALL
+{% endif %}
 {% endfor %}
