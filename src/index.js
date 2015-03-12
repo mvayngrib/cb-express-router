@@ -27,22 +27,24 @@ function createApp(config) {
   var rpc = new bitcoin.Client(config.rpc)
 
   // common blockchain api
+  var base = '/' + config.version
+
   var addresses = new Addresses(config.postgres, config.network)
-  app.post('/addresses/summary', addresses.summary.bind(addresses))
-  app.post('/addresses/transactions', addresses.transactions.bind(addresses))
-  app.post('/addresses/unspents', addresses.unspents.bind(addresses))
+  app.post(base + '/addresses/summary', addresses.summary.bind(addresses))
+  app.post(base + '/addresses/transactions', addresses.transactions.bind(addresses))
+  app.post(base + '/addresses/unspents', addresses.unspents.bind(addresses))
 
   var blocks = new Blocks(config.postgres, rpc)
-  app.post('/blocks/get', blocks.get.bind(blocks))
-  app.post('/blocks/latest', blocks.latest.bind(blocks))
-  app.post('/blocks/propagate', blocks.propagate.bind(blocks))
-  app.post('/blocks/summary', blocks.summary.bind(blocks))
+  app.post(base + '/blocks/get', blocks.get.bind(blocks))
+  app.post(base + '/blocks/latest', blocks.latest.bind(blocks))
+  app.post(base + '/blocks/propagate', blocks.propagate.bind(blocks))
+  app.post(base + '/blocks/summary', blocks.summary.bind(blocks))
 
   var transactions = new Transactions(config.postgres, rpc)
-  app.post('/transactions/get', transactions.get.bind(transactions))
-  app.post('/transactions/latest', transactions.latest.bind(transactions))
-  app.post('/transactions/propagate', transactions.propagate.bind(transactions))
-  app.post('/transactions/summary', transactions.summary.bind(transactions))
+  app.post(base + '/transactions/get', transactions.get.bind(transactions))
+  app.post(base + '/transactions/latest', transactions.latest.bind(transactions))
+  app.post(base + '/transactions/propagate', transactions.propagate.bind(transactions))
+  app.post(base + '/transactions/summary', transactions.summary.bind(transactions))
 
   // request counter (ignore non API requests)
   app.use(function(req, res, next) {

@@ -18,6 +18,7 @@ function defaultToEnvironment(obj, prefix) {
 
 var config = {
   "displayName": "",
+  "version": "v1",
   "network": "",
   "port": 80,
   "postgres": "",
