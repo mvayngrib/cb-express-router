@@ -60,6 +60,7 @@ app.set('view engine', 'html')
 app.set('views', __dirname + '/views')
 app.get('/', function(req, res) {
   res.render('index', {
+    displayName: config.displayName,
     uptime: timeSince(startTime),
     requests: api.requestCount
   })
