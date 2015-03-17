@@ -6,7 +6,7 @@ var sql = {
   addressSummary: swig.compileFile('./src/sql/addressSummary.sql'),
   addressTransactions: swig.compileFile('./src/sql/addressTransactions.sql'),
   addressUnspents: swig.compileFile('./src/sql/addressUnspents.sql'),
-  blocksGet: swig.compileFile('./src/sql/blocks.sql'),
+  blocks: swig.compileFile('./src/sql/blocks.sql'),
   blocksLatest: swig.compileFile('./src/sql/blocksLatest.sql'),
   transactionInputs: swig.compileFile('./src/sql/transactionInputs.sql'),
   transactionOutputs: swig.compileFile('./src/sql/transactionOutputs.sql'),
@@ -95,7 +95,7 @@ Database.prototype.blocksGet = function(blockIds, callback) {
   if (blockIds.length === 0) return callback(null, [])
 
   var bindArgs = utils.bindArguments(blockIds.length)
-  var query = sql.get({ blockIds: bindArgs })
+  var query = sql.blocks({ blockIds: bindArgs })
 
   utils.runQuery(this.connString, query, blockIds, function(err, results) {
     if (err) return callback(err)
@@ -133,7 +133,7 @@ Database.prototype.blocksGet = function(blockIds, callback) {
 }
 
 Database.prototype.blocksLatest = function(callback) {
-  var query = sql.latest({ limit: 1 })
+  var query = sql.blocksLatest({ limit: 1 })
 
   utils.runQuery(this.connString, query, [], function(err, results) {
     if (err) return callback(err)
@@ -154,7 +154,7 @@ Database.prototype.blocksSummary = function(blockIds, callback) {
   if (blockIds.length === 0) return callback(null, [])
 
   var bindArgs = utils.bindArguments(blockIds.length)
-  var query = sql.get({ blockIds: bindArgs })
+  var query = sql.blocksSummary({ blockIds: bindArgs })
 
   utils.runQuery(this.connString, query, blockIds, function(err, results) {
     if (err) return callback(err)
