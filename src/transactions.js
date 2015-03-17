@@ -62,7 +62,7 @@ Transactions.prototype.summary = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  this.db.transactionsSummary(function(err, results) {
+  this.db.transactionsSummary(txIds, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
     return res.jsend.success(results)

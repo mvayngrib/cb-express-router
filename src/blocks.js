@@ -17,7 +17,7 @@ Blocks.prototype.get = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  this.db.blocksGet(function(err, results) {
+  this.db.blocksGet(blockIds, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
     return res.jsend.success(results)
@@ -62,7 +62,7 @@ Blocks.prototype.summary = function(req, res) {
     return res.jsend.fail(e.message)
   }
 
-  this.db.blocksSummary(function(err, results) {
+  this.db.blocksSummary(blocksIds, function(err, results) {
     if (err) return res.jsend.error(err.message)
 
     return res.jsend.success(results)
