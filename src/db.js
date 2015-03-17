@@ -154,7 +154,7 @@ Database.prototype.blocksSummary = function(blockIds, callback) {
   if (blockIds.length === 0) return callback(null, [])
 
   var bindArgs = utils.bindArguments(blockIds.length)
-  var query = sql.blocksSummary({ blockIds: bindArgs })
+  var query = sql.blocks({ blockIds: bindArgs })
 
   utils.runQuery(this.connString, query, blockIds, function(err, results) {
     if (err) return callback(err)
