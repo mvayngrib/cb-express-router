@@ -57,9 +57,11 @@ Addresses.prototype.summary = function(req, res) {
 
 Addresses.prototype.transactions = function(req, res) {
   var addresses = req.body.addresses
+  var blockHeight = req.body.blockHeight || 0
 
   try {
     typeforce(['String'], addresses)
+    typeforce('Number', blockHeight)
     addresses.forEach(utils.validateAddress.bind(null, this.networkStr))
 
   } catch (e) {
