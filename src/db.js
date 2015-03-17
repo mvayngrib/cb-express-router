@@ -341,3 +341,5 @@ Database.prototype.transactionsSummary = function(txIds, callback) {
     }
   })
 }
+
+module.exports = Database
