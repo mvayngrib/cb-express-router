@@ -1,3 +1,17 @@
+var divulge = require('divulge')
+var config = divulge({
+  displayName: "",
+  version: "v1",
+  network: "",
+  port: 80,
+  postgres: "",
+  rpc: {
+    host: "",
+    port: 18332,
+    user: "",
+    pass: ""
+  }
+})
 var config = require('./config')
 var cors = require('cors')
 var express = require('express')
