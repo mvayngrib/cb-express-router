@@ -81,16 +81,15 @@ Database.prototype.addressTransactions = function(addresses, blockHeight, callba
   var query = sql.addressTransactions({ addresses: bindArgs })
   var self = this
 
-  runQuery(connString, query, addresses, function(err, details) {
+  runQuery(connString, query, addresses, function(err, rows) {
     if (err) return callback(err)
 
     var seen = {}
-    details.forEach(function(detail) {
-      detail.blockHeight = parseInt(detail.blockHeight)
-      detail.inputs = []
-      detail.outputs = []
+    rows.forEach(function(row) {
+      // enforce minimum blockHeight (always return unconfirmed)
+      if (parseInt(row.blockHeight) < blockHeight) return
 
-      seen[detail.txId] = detail
+      seen[row.txId] = true
     })
 
     var txIds = Object.keys(seen)
