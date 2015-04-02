@@ -30,7 +30,7 @@ function validate(body, networkStr) {
     body.txIds.forEach(function(txId) {
       if (txId.length === 64) return
 
-      throw new Error(txId + ' is not a valid blockId')
+      throw new Error(txId + ' is not a valid txId')
     })
 
   // validate blockIds
