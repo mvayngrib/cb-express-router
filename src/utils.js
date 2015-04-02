@@ -40,44 +40,6 @@ function bindArguments(n) {
   return args
 }
 
-function buildBlock(detail) {
-  var block = new bitcoinjs.Block()
-
-  block.version = detail.version
-  block.prevHash = bitcoinjs.bufferutils.reverse(new Buffer(detail.prevBlockId, 'hex'))
-  block.merkleRoot = bitcoinjs.bufferutils.reverse(new Buffer(detail.merkleRootHash, 'hex'))
-  block.timestamp = detail.timestamp
-  block.bits = detail.blockSize
-  block.nonce = detail.nonce
-
-  return block
-}
-
-function buildTransaction(detail) {
-  var tx = new bitcoinjs.Transaction()
-
-  tx.locktime = detail.locktime
-  tx.version = detail.version
-
-  detail.inputs.forEach(function(txIn) {
-    var txId = txIn.prevTxId
-    var vout = txIn.vout
-    var script = bitcoinjs.Script.fromHex(txIn.scriptSig)
-    var sequence = txIn.sequence
-
-    tx.addInput(txId, vout, sequence, script)
-  })
-
-  detail.outputs.forEach(function(txOut) {
-    var script = bitcoinjs.Script.fromHex(txOut.scriptPubKey)
-    var value = txOut.value
-
-    tx.addOutput(script, value)
-  })
-
-  return tx
-}
-
 function runQuery(connString, queryText, queryValues, callback) {
   pg.connect(connString, function(err, client, free) {
     if (err) return callback(err)
@@ -114,8 +76,6 @@ function validateTransactionId(txId) {
 module.exports = {
   batchRpc: batchRpc,
   bindArguments: bindArguments,
-  buildBlock: buildBlock,
-  buildTransaction: buildTransaction,
   runQuery: runQuery,
   validateAddress: validateAddress,
   validateBlockId: validateBlockId,

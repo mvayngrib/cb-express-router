@@ -1,4 +1,5 @@
 var async = require('async')
+var bitcoinjs = require('bitcoinjs-lib')
 var swig = require("swig")
 var utils = require('./utils')
 
@@ -117,11 +118,18 @@ Database.prototype.blocksGet = function(blockIds, callback) {
         if (!(blockId in seen)) throw blockId + ' not found'
 
         var detail = seen[blockId]
-        var blockHex = utils.buildBlock(detail).toHex()
+        var block = new bitcoinjs.Block()
+
+        block.version = detail.version
+        block.prevHash = bitcoinjs.bufferutils.reverse(new Buffer(detail.prevBlockId, 'hex'))
+        block.merkleRoot = bitcoinjs.bufferutils.reverse(new Buffer(detail.merkleRootHash, 'hex'))
+        block.timestamp = detail.timestamp
+        block.bits = detail.blockSize
+        block.nonce = detail.nonce
 
         return {
           blockId: blockId,
-          blockHex: blockHex
+          blockHex: block.toHex(),
         }
       }))
     } catch (e) {
@@ -185,7 +193,6 @@ Database.prototype.blocksSummary = function(blockIds, callback) {
   })
 }
 
-
 Database.prototype.transactionsGet = function(txIds, callback) {
   if (txIds.length === 0) return callback(null, [])
 
@@ -239,11 +246,30 @@ Database.prototype.transactionsGet = function(txIds, callback) {
         if (!(txId in seen)) throw txId + ' not found'
 
         var detail = seen[txId]
-        var txHex = utils.buildTransaction(detail).toHex()
+        var tx = new bitcoinjs.Transaction()
+
+        tx.locktime = detail.locktime
+        tx.version = detail.version
+
+        detail.inputs.forEach(function(txIn) {
+          var txId = txIn.prevTxId
+          var vout = txIn.vout
+          var script = bitcoinjs.Script.fromHex(txIn.scriptSig)
+          var sequence = txIn.sequence
+
+          tx.addInput(txId, vout, sequence, script)
+        })
+
+        detail.outputs.forEach(function(txOut) {
+          var script = bitcoinjs.Script.fromHex(txOut.scriptPubKey)
+          var value = txOut.value
+
+          tx.addOutput(script, value)
+        })
 
         return {
           txId: txId,
-          txHex: txHex,
+          txHex: tx.toHex(),
           blockId: detail.blockId,
           blockHeight: detail.blockHeight
         }
