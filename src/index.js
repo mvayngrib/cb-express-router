@@ -1,60 +1,133 @@
 var bitcoin = require('bitcoin')
+var bitcoinjs = require('bitcoinjs-lib')
 var express = require('express')
 var bodyParser = require('body-parser')
 var jsend = require('jsend')
-
-var Addresses = require('./addresses')
-var Blocks = require('./blocks')
 var Database = require('./db')
-var Transactions = require('./transactions')
+var typeforce = require('typeforce')
+var types = require('common-blockchain').types
 
-function createApp(config) {
-  var app = express()
-  app.requestCount = 0
+function validate(body, networkStr) {
+  // validate addresses
+  if ('addresses' in body) {
+    var network = bitcoinjs.networks[networkStr]
+
+    body.addresses.forEach(function(addressStr) {
+      try {
+        var address = bitcoinjs.Address.fromBase58Check(addressStr)
+
+        if (address.version !== network.pubKeyHash &&
+            address.version !== network.scriptHash) throw new Error('Bad network')
+      } catch(e) {
+        throw new Error(addressStr + ' is not a valid ' + networkStr + ' address')
+      }
+    })
+
+  // validate txIds
+  } else if ('txIds' in body) {
+    body.txIds.forEach(function(txId) {
+      if (txId.length === 64) return
+
+      throw new Error(txId + ' is not a valid blockId')
+    })
+
+  // validate blockIds
+  } else if ('blockIds' in body) {
+    body.blockIds.forEach(function(blockId) {
+      if (blockId.length === 64) return
+
+      throw new Error(blockId + ' is not a valid blockId')
+    })
+  }
+}
+
+function createRouter(config) {
+  var router = express()
 
   // parse application/json
-  app.use(bodyParser.json())
+  router.use(bodyParser.json())
 
   // jsend
-  app.use(jsend.middleware)
+  router.use(jsend.middleware)
 
   // request counter
-  app.use(function(req, res, next) {
-    app.requestCount += 1
+  router.requestCount = 0
+  router.use(function(req, res, next) {
+    router.requestCount += 1
     next()
   })
 
   // rpc api
-  var database = new Database(config.postgres)
   var rpc = new bitcoin.Client(config.rpc)
+  var database = new Database(config.postgres)
+  var network = config.network
 
   // common blockchain api
   var base = '/' + config.version
 
-  var addresses = new Addresses(database, config.network)
-  app.post(base + '/addresses/summary', addresses.summary.bind(addresses))
-  app.post(base + '/addresses/transactions', addresses.transactions.bind(addresses))
-  app.post(base + '/addresses/unspents', addresses.unspents.bind(addresses))
+  // POST route helper function
+  function endpoint(route, cbType, callback) {
+    router.post(base + route, function(req, res) {
+      // validate the inputs
+      try {
+        typeforce(cbType.arguments, req.body)
+        validate(req.body, network)
+      } catch (e) {
+        return res.jsend.error(e.message)
+      }
 
-  var blocks = new Blocks(database, rpc)
-  app.post(base + '/blocks/get', blocks.get.bind(blocks))
-  app.post(base + '/blocks/latest', blocks.latest.bind(blocks))
-  app.post(base + '/blocks/propagate', blocks.propagate.bind(blocks))
-  app.post(base + '/blocks/summary', blocks.summary.bind(blocks))
+      callback(req.body, function(err, results) {
+        if (err) return res.jsend.error(err.message)
 
-  var transactions = new Transactions(database, rpc)
-  app.post(base + '/transactions/get', transactions.get.bind(transactions))
-  app.post(base + '/transactions/latest', transactions.latest.bind(transactions))
-  app.post(base + '/transactions/propagate', transactions.propagate.bind(transactions))
-  app.post(base + '/transactions/summary', transactions.summary.bind(transactions))
+        // debug only
+        // typeforce(cbType.expected, results)
 
-  // request counter (ignore non API requests)
-  app.use(function(req, res, next) {
-    app.requestCount -= 1
+        return res.jsend.success(results)
+      })
+    })
+  }
+
+  endpoint('/addresses/summary', types.addresses.summary, function(body, callback) {
+    database.addressSummary(body.addresses, callback)
+  })
+  endpoint('/addresses/transactions', types.addresses.transactions, function(body, callback) {
+    database.addressTransactions(body.addresses, body.blockHeight || 0, callback)
+  })
+  endpoint('/addresses/unspents', types.addresses.unspents, function(body, callback) {
+    database.addressUnspents(body.addresses, callback)
+  })
+  endpoint('/blocks/get', types.blocks.get, function(body, callback) {
+    database.blocksGet(body.blockIds, callback)
+  })
+  endpoint('/blocks/latest', types.blocks.latest, function(body, callback) {
+    database.blocksLatest(body.blockIds, callback)
+  })
+  endpoint('/blocks/propagate', types.blocks.propagate, function(body, callback) {
+    rpc.submitBlock(body.blockHex, callback)
+  })
+  endpoint('/blocks/summary', types.blocks.summary, function(body, callback) {
+    database.blocksSummary(body.blockIds, callback)
+  })
+  endpoint('/transactions/get', types.transactions.get, function(body, callback) {
+    database.transactionsGet(body.txIds, callback)
+  })
+  endpoint('/transactions/latest', types.transactions.latest, function(body, callback) {
+    database.transactionsLatest(body.txIds, callback)
+  })
+  endpoint('/transactions/propagate', types.transactions.propagate, function(body, callback) {
+    rpc.sendRawTransaction(body.txHex, callback)
+  })
+  endpoint('/transactions/summary', types.transactions.summary, function(body, callback) {
+    database.transactions(body.txIds, callback)
+  })
+
+  // request counter (ignore irrelevant requests)
+  router.use(function(req, res, next) {
+    router.requestCount -= 1
     next()
   })
 
-  return app
+  return router
 }
 
-module.exports = createApp
+module.exports = createRouter

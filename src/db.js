@@ -1,7 +1,7 @@
 var async = require('async')
 var bitcoinjs = require('bitcoinjs-lib')
+var pg = require('pg')
 var swig = require("swig")
-var utils = require('./utils')
 
 var sql = {
   addressSummary: swig.compileFile('./src/sql/addressSummary.sql'),
@@ -15,6 +15,31 @@ var sql = {
   transactionsLatest: swig.compileFile('./src/sql/transactionsLatest.sql')
 }
 
+var __bindCache = {}
+function bindArguments(n) {
+  if (n in __bindCache) return __bindCache[n]
+
+  var args = []
+  for (var i = 1; i <= n; ++i) {
+    args.push('$' + i)
+  }
+
+  __bindCache[n] = args
+  return args
+}
+
+function runQuery(connString, queryText, queryValues, callback) {
+  pg.connect(connString, function(err, client, free) {
+    if (err) return callback(err)
+
+    client.query(queryText, queryValues, function(err, results) {
+      free()
+
+      return callback(err, results && results.rows)
+    })
+  })
+}
+
 function Database(connString) {
   this.connString = connString
 }
@@ -22,10 +47,10 @@ function Database(connString) {
 Database.prototype.addressSummary = function(addresses, callback) {
   if (addresses.length === 0) return callback(null, [])
 
-  var bindArgs = utils.bindArguments(addresses.length)
+  var bindArgs = bindArguments(addresses.length)
   var query = sql.addressSummary({ addresses: bindArgs })
 
-  utils.runQuery(this.connString, query, addresses, function(err, results) {
+  runQuery(this.connString, query, addresses, function(err, results) {
     if (err) return callback(err)
 
     var seen = {}
@@ -52,11 +77,11 @@ Database.prototype.addressTransactions = function(addresses, blockHeight, callba
   if (addresses.length === 0) return callback(null, [])
 
   var connString = this.connString
-  var bindArgs = utils.bindArguments(addresses.length)
+  var bindArgs = bindArguments(addresses.length)
   var query = sql.addressTransactions({ addresses: bindArgs })
   var self = this
 
-  utils.runQuery(connString, query, addresses, function(err, details) {
+  runQuery(connString, query, addresses, function(err, details) {
     if (err) return callback(err)
 
     var seen = {}
@@ -76,10 +101,10 @@ Database.prototype.addressTransactions = function(addresses, blockHeight, callba
 Database.prototype.addressUnspents = function(addresses, callback) {
   if (addresses.length === 0) return callback(null, [])
 
-  var bindArgs = utils.bindArguments(addresses.length)
+  var bindArgs = bindArguments(addresses.length)
   var query = sql.addressUnspents({ addresses: bindArgs })
 
-  utils.runQuery(this.connString, query, addresses, function(err, results) {
+  runQuery(this.connString, query, addresses, function(err, results) {
     if (err) return callback(err)
 
     callback(null, results.map(function(result) {
@@ -95,10 +120,10 @@ Database.prototype.addressUnspents = function(addresses, callback) {
 Database.prototype.blocksGet = function(blockIds, callback) {
   if (blockIds.length === 0) return callback(null, [])
 
-  var bindArgs = utils.bindArguments(blockIds.length)
+  var bindArgs = bindArguments(blockIds.length)
   var query = sql.blocks({ blockIds: bindArgs })
 
-  utils.runQuery(this.connString, query, blockIds, function(err, results) {
+  runQuery(this.connString, query, blockIds, function(err, results) {
     if (err) return callback(err)
 
     var seen = {}
@@ -121,8 +146,8 @@ Database.prototype.blocksGet = function(blockIds, callback) {
         var block = new bitcoinjs.Block()
 
         block.version = detail.version
-        block.prevHash = bitcoinjs.bufferutils.reverse(new Buffer(detail.prevBlockId, 'hex'))
-        block.merkleRoot = bitcoinjs.bufferutils.reverse(new Buffer(detail.merkleRootHash, 'hex'))
+        block.prevHash = bitcoinjs.bufferreverse(new Buffer(detail.prevBlockId, 'hex'))
+        block.merkleRoot = bitcoinjs.bufferreverse(new Buffer(detail.merkleRootHash, 'hex'))
         block.timestamp = detail.timestamp
         block.bits = detail.blockSize
         block.nonce = detail.nonce
@@ -143,7 +168,7 @@ Database.prototype.blocksGet = function(blockIds, callback) {
 Database.prototype.blocksLatest = function(callback) {
   var query = sql.blocksLatest({ limit: 1 })
 
-  utils.runQuery(this.connString, query, [], function(err, results) {
+  runQuery(this.connString, query, [], function(err, results) {
     if (err) return callback(err)
 
     var latest = results.pop()
@@ -161,10 +186,10 @@ Database.prototype.blocksLatest = function(callback) {
 Database.prototype.blocksSummary = function(blockIds, callback) {
   if (blockIds.length === 0) return callback(null, [])
 
-  var bindArgs = utils.bindArguments(blockIds.length)
+  var bindArgs = bindArguments(blockIds.length)
   var query = sql.blocks({ blockIds: bindArgs })
 
-  utils.runQuery(this.connString, query, blockIds, function(err, results) {
+  runQuery(this.connString, query, blockIds, function(err, results) {
     if (err) return callback(err)
 
     var seen = {}
@@ -196,15 +221,15 @@ Database.prototype.blocksSummary = function(blockIds, callback) {
 Database.prototype.transactionsGet = function(txIds, callback) {
   if (txIds.length === 0) return callback(null, [])
 
-  var bindArgs = utils.bindArguments(txIds.length)
+  var bindArgs = bindArguments(txIds.length)
   var query = sql.transactions({ txIds: bindArgs })
   var queryInputs = sql.transactionInputs({ txIds: bindArgs })
   var queryOutputs = sql.transactionOutputs({ txIds: bindArgs })
 
   async.parallel([
-    utils.runQuery.bind(null, this.connString, query, txIds),
-    utils.runQuery.bind(null, this.connString, queryInputs, txIds),
-    utils.runQuery.bind(null, this.connString, queryOutputs, txIds)
+    runQuery.bind(null, this.connString, query, txIds),
+    runQuery.bind(null, this.connString, queryInputs, txIds),
+    runQuery.bind(null, this.connString, queryOutputs, txIds)
   ], function(err, results) {
     if (err) return callback(err)
 
@@ -286,7 +311,7 @@ Database.prototype.transactionsLatest = function(callback) {
   var query = sql.transactionsLatest()
   var self = this
 
-  utils.runQuery(this.connString, query, [], function(err, details) {
+  runQuery(this.connString, query, [], function(err, details) {
     if (err) return callback(err)
 
     var txIds = details.map(function(detail) { return detail.txId })
@@ -297,15 +322,15 @@ Database.prototype.transactionsLatest = function(callback) {
 Database.prototype.transactionsSummary = function(txIds, callback) {
   if (txIds.length === 0) return callback(null, [])
 
-  var bindArgs = utils.bindArguments(txIds.length)
+  var bindArgs = bindArguments(txIds.length)
   var query = sql.transactions({ txIds: bindArgs })
   var queryInputs = sql.transactionInputs({ txIds: bindArgs })
   var queryOutputs = sql.transactionOutputs({ txIds: bindArgs })
 
   async.parallel([
-    utils.runQuery.bind(null, this.connString, query, txIds),
-    utils.runQuery.bind(null, this.connString, queryInputs, txIds),
-    utils.runQuery.bind(null, this.connString, queryOutputs, txIds)
+    runQuery.bind(null, this.connString, query, txIds),
+    runQuery.bind(null, this.connString, queryInputs, txIds),
+    runQuery.bind(null, this.connString, queryOutputs, txIds)
   ], function(err, results) {
     if (err) return callback(err)
 
