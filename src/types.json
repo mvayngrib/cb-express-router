@@ -110,10 +110,12 @@
           "String"
         ]
       },
-      "expected": {
-        "txHex": "String",
-        "txId": "String"
-      }
+      "expected": [
+        {
+          "txHex": "String",
+          "txId": "String"
+        }
+      ]
     },
     "latest": {
       "arguments": {},
@@ -136,15 +138,17 @@
           "String"
         ]
       },
-      "expected": {
-        "blockHeight": "?Number",
-        "blockId": "?String",
-        "nInputs": "Number",
-        "nOutputs": "Number",
-        "totalInputValue": "Number",
-        "totalOutputValue": "Number",
-        "txId": "String"
-      }
+      "expected": [
+        {
+          "blockHeight": "?Number",
+          "blockId": "?String",
+          "nInputs": "Number",
+          "nOutputs": "Number",
+          "totalInputValue": "Number",
+          "totalOutputValue": "Number",
+          "txId": "String"
+        }
+      ]
     }
   }
 }
