@@ -146,15 +146,15 @@ Database.prototype.blocksGet = function(blockIds, callback) {
         var block = new bitcoinjs.Block()
 
         block.version = detail.version
-        block.prevHash = bitcoinjs.bufferreverse(new Buffer(detail.prevBlockId, 'hex'))
-        block.merkleRoot = bitcoinjs.bufferreverse(new Buffer(detail.merkleRootHash, 'hex'))
+        block.prevHash = bitcoinjs.bufferutils.reverse(new Buffer(detail.prevBlockId, 'hex'))
+        block.merkleRoot = bitcoinjs.bufferutils.reverse(new Buffer(detail.merkleRootHash, 'hex'))
         block.timestamp = detail.timestamp
         block.bits = detail.blockSize
         block.nonce = detail.nonce
 
         return {
-          blockId: blockId,
           blockHex: block.toHex(),
+          blockId: blockId
         }
       }))
     } catch (e) {
