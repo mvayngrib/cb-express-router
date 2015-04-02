@@ -122,7 +122,7 @@ function createRouter(config) {
     }, callback)
   })
   endpoint('/transactions/summary', types.transactions.summary, function(body, callback) {
-    database.transactions(body.txIds, callback)
+    database.transactionsSummary(body.txIds, callback)
   })
 
   // request counter (ignore irrelevant requests)

@@ -128,7 +128,9 @@
     },
     "propagate": {
       "arguments": {
-        "txHexs": ["String"]
+        "txHexs": [
+          "String"
+        ]
       },
       "expected": {}
     },
