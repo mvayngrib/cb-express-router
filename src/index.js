@@ -80,7 +80,7 @@ function createRouter(config) {
         if (err) return res.jsend.error(err.message)
 
         // debug only
-        // typeforce(cbType.expected, results)
+//        typeforce(cbType.expected, results)
 
         return res.jsend.success(results)
       })
