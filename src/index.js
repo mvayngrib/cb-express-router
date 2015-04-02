@@ -1,3 +1,4 @@
+var async = require('async')
 var bitcoin = require('bitcoin')
 var bitcoinjs = require('bitcoinjs-lib')
 var bodyParser = require('body-parser')
@@ -101,7 +102,7 @@ function createRouter(config) {
     database.blocksGet(body.blockIds, callback)
   })
   endpoint('/blocks/latest', types.blocks.latest, function(body, callback) {
-    database.blocksLatest(body.blockIds, callback)
+    database.blocksLatest(callback)
   })
   endpoint('/blocks/propagate', types.blocks.propagate, function(body, callback) {
     rpc.submitBlock(body.blockHex, callback)
@@ -113,10 +114,12 @@ function createRouter(config) {
     database.transactionsGet(body.txIds, callback)
   })
   endpoint('/transactions/latest', types.transactions.latest, function(body, callback) {
-    database.transactionsLatest(body.txIds, callback)
+    database.transactionsLatest(callback)
   })
   endpoint('/transactions/propagate', types.transactions.propagate, function(body, callback) {
-    rpc.sendRawTransaction(body.txHex, callback)
+    async.mapSeries(body.txHexs, function(txHex, callback2) {
+      rpc.sendRawTransaction(txHex, callback2)
+    }, callback)
   })
   endpoint('/transactions/summary', types.transactions.summary, function(body, callback) {
     database.transactions(body.txIds, callback)
