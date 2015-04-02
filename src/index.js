@@ -1,11 +1,12 @@
 var bitcoin = require('bitcoin')
 var bitcoinjs = require('bitcoinjs-lib')
-var express = require('express')
 var bodyParser = require('body-parser')
+var express = require('express')
 var jsend = require('jsend')
-var Database = require('./db')
 var typeforce = require('typeforce')
-var types = require('common-blockchain').types
+var types = require('./types')
+
+var Database = require('./db')
 
 function validate(body, networkStr) {
   // validate addresses
@@ -63,7 +64,7 @@ function createRouter(config) {
   var network = config.network
 
   // common blockchain api
-  var base = '/' + config.version
+  var base = '/v1'
 
   // POST route helper function
   function endpoint(route, cbType, callback) {
