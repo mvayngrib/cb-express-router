@@ -15,6 +15,17 @@ h1 {
 	letter-spacing: -0.05em;
 	text-align: center;
 }
+ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+li {
+	padding: 20px;
+}
+li:nth-child(odd) {
+	background-color: rgba(255,255,255,0.1);
+}
 .wrapper {
 	margin: 10% auto;
 	max-width: 700px;
@@ -31,45 +42,12 @@ h1 {
 	float: left;
 	width: 50%;
 }
-.list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-.list-item {
-	padding: 20px;
-}
 .label-item {
 	color: #aaa;
-}
-.list-item:nth-child(odd) {
-	background-color: rgba(255,255,255,0.1);
-}
-.label-item {
 	text-align: right;
 }
 @media only screen and (min-width: 620px) {
 	body {
 		font-size: 24px;
 	}
-}
-
-/* nice styles */
-.nice {
-	background-color: #f3f3f3;
-	color: #333;
-}
-.nice .box {
-	background-color: white;
-	box-shadow: 0 1px 8px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
-}
-.nice .label-item {
-	color: #666;
-	font-weight: 300;
-}
-.nice .output-item {
-	font-weight: 500;
-}
-.nice .list-item + .list-item {
-	border-top: 1px solid #eee;
 }
