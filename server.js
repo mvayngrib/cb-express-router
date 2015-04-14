@@ -16,11 +16,11 @@ var express = require('express')
 var morgan = require('morgan')
 var swig = require('swig')
 
-var createApp = require('./src')
+var createRouter = require('./lib')
 
 ////////////////////////////////////////////////////////
 
-var api = createApp(config)
+var api = createRouter(config)
 var app = express()
 
 // reverse proxy in use
