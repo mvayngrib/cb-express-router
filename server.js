@@ -10,7 +10,7 @@ var config = divulge({
     user: "",
     pass: ""
   }
-})
+}, '', process.env)
 var cors = require('cors')
 var express = require('express')
 var morgan = require('morgan')
