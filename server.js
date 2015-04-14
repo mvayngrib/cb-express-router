@@ -55,7 +55,7 @@ app.get('/', function(req, res) {
 })
 
 // otherwise serve statically
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/public'))
 
 ////////////////////////////////////////////////////////
 
