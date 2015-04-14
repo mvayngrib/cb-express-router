@@ -11,7 +11,6 @@ body {
 	font-weight: normal;
 }
 h1 {
-	/*color: #333;*/
 	font-weight: bold;
 	letter-spacing: -0.05em;
 	text-align: center;
@@ -56,16 +55,13 @@ h1 {
 }
 
 /* nice styles */
-
 .nice {
 	background-color: #f3f3f3;
 	color: #333;
-	/*font-family: Helvetica Neue, Helvetica, Arial, sans-serif;*/
 }
 .nice .box {
 	background-color: white;
 	box-shadow: 0 1px 8px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
-	/*padding: 10px 0;*/
 }
 .nice .label-item {
 	color: #666;
