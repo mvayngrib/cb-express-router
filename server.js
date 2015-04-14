@@ -1,22 +1,22 @@
-var divulge = require('divulge')
-var config = divulge({
-  displayName: "",
-  network: "",
-  port: 80,
-  postgres: "",
-  rpc: {
-    host: "",
-    port: 18332,
-    user: "",
-    pass: ""
-  }
-}, '', process.env)
 var cors = require('cors')
+var divulge = require('divulge')
 var express = require('express')
 var morgan = require('morgan')
 var swig = require('swig')
 var timeago = require('timeago')
 
+var config = divulge({
+  displayName: "",
+  network: "bitcoin",
+  port: 80,
+  postgres: "",
+  rpc: {
+    host: "",
+    port: 8332,
+    user: "",
+    pass: ""
+  }
+}, '', process.env)
 var createRouter = require('./lib')
 
 ////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ app.set('views', __dirname + '/views')
 app.get('/', function(req, res) {
   res.render('index', {
     displayName: config.displayName,
-    uptime: timeago(+startTime),
+    started: timeago(+startTime),
     requests: api.requestCount
   })
 })
