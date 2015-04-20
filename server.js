@@ -21,7 +21,7 @@ var createRouter = require('./lib')
 
 ////////////////////////////////////////////////////////
 
-var api = createRouter(config)
+var api = createRouter('/v1', config)
 var app = express()
 
 // reverse proxy in use
