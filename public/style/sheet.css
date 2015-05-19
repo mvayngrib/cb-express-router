@@ -16,9 +16,11 @@ h1 {
 	text-align: center;
 }
 ul {
+	float: left;
 	list-style: none;
 	margin: 0;
 	padding: 0;
+	width: 50%;
 }
 li {
 	padding: 20px;
@@ -37,10 +39,6 @@ li:nth-child(odd) {
 	box-shadow: 0 1px 8px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.05);
 	border-radius: 3px;
 	overflow: hidden;
-}
-.col {
-	float: left;
-	width: 50%;
 }
 .label-item {
 	color: #aaa;
