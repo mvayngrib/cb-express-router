@@ -1,11 +1,17 @@
 var cors = require('cors')
 var divulge = require('divulge')
 var express = require('express')
+var fs = require('fs')
+var http = require('http')
+var https = require('https')
 var morgan = require('morgan')
 var swig = require('swig')
 var timeago = require('timeago')
 
-var config = divulge({
+////////////////////////////////////////////////////////
+
+var createRouter = require('./lib')
+var config = divulge(process.env, {
   displayName: "",
   network: "bitcoin",
   port: 80,
@@ -16,12 +22,11 @@ var config = divulge({
     user: "",
     pass: ""
   }
-}, '', process.env)
-var createRouter = require('./lib')
+})
 
 ////////////////////////////////////////////////////////
 
-var api = createRouter('/v1', config)
+var appRouter = createRouter('/v1', config)
 var app = express()
 
 // reverse proxy in use
@@ -36,8 +41,8 @@ app.use(morgan('tiny'))
 // allow cross origin requests
 app.use(cors())
 
-// our custom api
-app.use(api)
+// our custom router
+app.use(appRouter)
 
 ////////////////////////////////////////////////////////
 
@@ -50,7 +55,7 @@ app.get('/', function(req, res) {
   res.render('index', {
     displayName: config.displayName,
     started: timeago(+startTime),
-    requests: api.requestCount
+    requests: appRouter.requestCount
   })
 })
 
@@ -61,17 +66,12 @@ app.use(express.static(__dirname + '/public'))
 
 var server
 if (config.https) {
-  var fs = require('fs')
-  var https = require('https')
-
   server = https.createServer({
     key: fs.readFileSync(config.https.key),
     cert: fs.readFileSync(config.https.cert)
   }, app)
 
 } else {
-  var http = require('http')
-
   server = http.createServer(app)
 }
 
