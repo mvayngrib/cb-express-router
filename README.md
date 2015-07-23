@@ -1,22 +1,11 @@
-# cb-node-server
+# cb-http-router
 
-Common blockchain API server backed by a POSTGRES database.
+A plug-and-play express router module
 
-This is **not** a blockchain parser, it relies on an up-to-date POSTGRES database.
-
-
-For now, the SQL queries in `lib/sql/` are tailored to Helloblock.io database schemas.
-
-The ideal would be to have these swappable to ANY database.
-The implementation should be simple enough, and the work flow is still in WIP.
+This is **not** a blockchain parser, it requires a compliant common-blockchain data model to perform queries.
 
 
 ## tests
 
 Currently there are no localized tests.
-You can check its results and conformity against https://github.com/common-blockchain/cb-node however, as it is quite thorough.
-
-
-## example
-
-See https://common-blockchain.herokuapp.com/ for a live heroku server as an example.
+However, you can check its results and conformity against https://github.com/common-blockchain/cb-http-client
