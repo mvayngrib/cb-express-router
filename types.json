@@ -68,6 +68,7 @@
         "blockHeight": "Number",
         "blockId": "String",
         "blockSize": "Number",
+        "bits": "?Number",
         "merkleRootHash": "String",
         "nonce": "Number",
         "prevBlockId": "String",
@@ -93,6 +94,7 @@
           "blockHeight": "Number",
           "blockId": "String",
           "blockSize": "Number",
+          "bits": "?Number",
           "merkleRootHash": "String",
           "nonce": "Number",
           "prevBlockId": "String",
@@ -112,6 +114,8 @@
       },
       "expected": [
         {
+          "blockHeight": "?Number",
+          "blockId": "?String",
           "txHex": "String",
           "txId": "String"
         }
