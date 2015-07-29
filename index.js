@@ -91,7 +91,7 @@ function createRouter (api, networkName) {
   endpoint('/addresses/unspents', types.addresses.unspents, function (body, callback) {
     if (body.addresses.length === 0) return callback(null, [])
 
-    api.address.unspents(body.addresses, callback)
+    api.addresses.unspents(body.addresses, callback)
   })
   endpoint('/blocks/get', types.blocks.get, function (body, callback) {
     if (body.blockIds.length === 0) return callback(null, [])
