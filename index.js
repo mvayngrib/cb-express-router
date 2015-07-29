@@ -118,9 +118,9 @@ function createRouter (api, networkName) {
     api.transactions.latest(callback)
   })
   endpoint('/transactions/propagate', types.transactions.propagate, function (body, callback) {
-    async.mapSeries(body.txHexs, function (txHex, callback2) {
-      api.transactions.propagate(txHex, callback2)
-    }, callback)
+    if (body.txHexs.length === 0) return callback(null, [])
+
+    api.transactions.propagate(body.txHexs, callback)
   })
   endpoint('/transactions/summary', types.transactions.summary, function (body, callback) {
     if (body.txIds.length === 0) return callback(null, [])
