@@ -137,7 +137,9 @@
         ]
       },
       "expected": {
-        "txId": "String"
+        "txIds": [
+          "String"
+        ]
       }
     },
     "summary": {
