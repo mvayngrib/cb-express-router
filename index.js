@@ -125,7 +125,7 @@ function createRouter (api, networkName) {
   endpoint('/transactions/summary', types.transactions.summary, function (body, callback) {
     if (body.txIds.length === 0) return callback(null, [])
 
-    api.transactionsSummary(body.txIds, callback)
+    api.transactions.summary(body.txIds, callback)
   })
 
   return router
