@@ -136,7 +136,9 @@
           "String"
         ]
       },
-      "expected": {}
+      "expected": {
+        "txId": "String"
+      }
     },
     "summary": {
       "arguments": {
