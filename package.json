@@ -1,6 +1,6 @@
 {
   "name": "cb-http-router",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "cb-http-router",
   "main": "index.js",
   "scripts": {
