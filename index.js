@@ -1,45 +1,8 @@
-var async = require('async')
-var bitcoinjs = require('bitcoinjs-lib')
 var bodyParser = require('body-parser')
 var express = require('express')
 var jsend = require('jsend')
 var typeforce = require('typeforce')
 var types = require('./types')
-
-// TODO: extract to be inline with typeforce
-function validate (body, networkName) {
-  // validate addresses
-  if ('addresses' in body) {
-    var network = bitcoinjs.networks[networkName]
-
-    body.addresses.forEach(function (addressStr) {
-      try {
-        var address = bitcoinjs.Address.fromBase58Check(addressStr)
-
-        if (address.version !== network.pubKeyHash &&
-          address.version !== network.scriptHash) throw new Error('Bad network')
-      } catch(e) {
-        throw new Error(addressStr + ' is not a valid ' + networkName + ' address')
-      }
-    })
-
-  // validate txIds
-  } else if ('txIds' in body) {
-    body.txIds.forEach(function (txId) {
-      if (txId.length === 64) return
-
-      throw new Error(txId + ' is not a valid txId')
-    })
-
-  // validate blockIds
-  } else if ('blockIds' in body) {
-    body.blockIds.forEach(function (blockId) {
-      if (blockId.length === 64) return
-
-      throw new Error(blockId + ' is not a valid blockId')
-    })
-  }
-}
 
 function createRouter (api, networkName) {
   var router = express()
@@ -51,12 +14,14 @@ function createRouter (api, networkName) {
   router.use(jsend.middleware)
 
   // POST route helper function
-  function endpoint (route, cbType, callback) {
+  function endpoint (route, type, callback) {
+    var cArgType = typeforce.compile(type.arguments)
+    var cExpType = typeforce.compile(type.expected)
+
     router.post(route, function (req, res) {
       // validate the inputs
       try {
-        typeforce(cbType.arguments, req.body, true)
-        validate(req.body, networkName)
+        typeforce(cArgType, req.body, true)
 
       } catch (e) {
         return res.jsend.error(e.message)
@@ -67,7 +32,7 @@ function createRouter (api, networkName) {
 
         // enforce our own spec. compliance
         try {
-          typeforce(cbType.expected, results, true)
+          typeforce(cExpType, results, true)
 
         } catch (e) {
           return res.jsend.error(e.message)
