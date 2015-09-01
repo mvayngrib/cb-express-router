@@ -1,7 +1,7 @@
 # cb-http-router
 
-[![TRAVIS](https://secure.travis-ci.org/dcousens/PROJECTNAME.png)](http://travis-ci.org/dcousens/PROJECTNAME)
-[![NPM](http://img.shields.io/npm/v/PROJECTNAME.svg)](https://www.npmjs.org/package/PROJECTNAME)
+[![TRAVIS](https://secure.travis-ci.org/common-blockchain/cb-http-router.png)](http://travis-ci.org/common-blockchain/cb-http-router)
+[![NPM](http://img.shields.io/npm/v/cb-http-router.svg)](https://www.npmjs.org/package/cb-http-router)
 
 [![js-standard-style](https://cdn.rawgit.com/feross/standard/master/badge.svg)](https://github.com/feross/standard)
 
