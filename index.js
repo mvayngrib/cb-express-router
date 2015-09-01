@@ -4,7 +4,7 @@ var jsend = require('jsend')
 var typeforce = require('typeforce')
 var types = require('./types')
 
-function createRouter (api, networkName) {
+function createRouter (api) {
   var router = express()
 
   // parse application/json
