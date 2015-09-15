@@ -1,26 +1,26 @@
 var typeforce = require('typeforce')
 
-function bs58 (value) {
+function Base58Address (value) {
   return typeforce.String(value) && /^[1-9A-HJ-NP-Za-km-z]{26,35}$/.test(value)
 }
 
-function hash256 (value) {
-  return typeforce.String(value) && /^[0-9a-f]{64}$/i.test(value)
+function Hex (value) {
+  return typeforce.String(value) && /^([0-9a-f]{2})+$/i.test(value)
 }
 
-function hex (value) {
-  return typeforce.String(value) && /^([0-9a-f]{2})+$/i.test(value)
+function Hex256bit (value) {
+  return typeforce.String(value) && /^[0-9a-f]{64}$/i.test(value)
 }
 
 module.exports = {
   'addresses': {
     'summary': {
       'arguments': {
-        'addresses': [bs58]
+        'addresses': [Base58Address]
       },
       'expected': [
         {
-          'address': bs58,
+          'address': Base58Address,
           'balance': 'Number',
           'totalReceived': 'Number',
           'txCount': 'Number'
@@ -29,27 +29,27 @@ module.exports = {
     },
     'transactions': {
       'arguments': {
-        'addresses': [bs58],
+        'addresses': [Base58Address],
         'blockHeight': '?Number'
       },
       'expected': [
         {
           'blockHeight': '?Number',
-          'blockId': typeforce.maybe(hex),
-          'txHex': hex,
-          'txId': hash256
+          'blockId': typeforce.maybe(Hex),
+          'txHex': Hex,
+          'txId': Hex256bit
         }
       ]
     },
     'unspents': {
       'arguments': {
-        'addresses': [bs58]
+        'addresses': [Base58Address]
       },
       'expected': [
         {
-          'address': bs58,
+          'address': Base58Address,
           'confirmations': 'Number',
-          'txId': hash256,
+          'txId': Hex256bit,
           'value': 'Number',
           'vout': 'Number'
         }
@@ -59,12 +59,12 @@ module.exports = {
   'blocks': {
     'get': {
       'arguments': {
-        'blockIds': [hash256]
+        'blockIds': [Hex256bit]
       },
       'expected': [
         {
-          'blockHex': hex,
-          'blockId': hash256
+          'blockHex': Hex,
+          'blockId': Hex256bit
         }
       ]
     },
@@ -72,12 +72,12 @@ module.exports = {
       'arguments': {},
       'expected': {
         'blockHeight': 'Number',
-        'blockId': hash256,
+        'blockId': Hex256bit,
         'blockSize': 'Number',
         'bits': '?Number',
-        'merkleRootHash': hash256,
+        'merkleRootHash': Hex256bit,
         'nonce': 'Number',
-        'prevBlockId': hash256,
+        'prevBlockId': Hex256bit,
         'timestamp': 'Number',
         'txCount': 'Number',
         'version': 'Number'
@@ -85,23 +85,23 @@ module.exports = {
     },
     'propagate': {
       'arguments': {
-        'blockHex': hex
+        'blockHex': Hex
       },
       'expected': {}
     },
     'summary': {
       'arguments': {
-        'blockIds': [hash256]
+        'blockIds': [Hex256bit]
       },
       'expected': [
         {
           'blockHeight': 'Number',
-          'blockId': hash256,
+          'blockId': Hex256bit,
           'blockSize': 'Number',
           'bits': '?Number',
-          'merkleRootHash': hash256,
+          'merkleRootHash': Hex256bit,
           'nonce': 'Number',
-          'prevBlockId': hash256,
+          'prevBlockId': Hex256bit,
           'timestamp': 'Number',
           'txCount': 'Number',
           'version': 'Number'
@@ -112,14 +112,14 @@ module.exports = {
   'transactions': {
     'get': {
       'arguments': {
-        'txIds': [hash256]
+        'txIds': [Hex256bit]
       },
       'expected': [
         {
           'blockHeight': '?Number',
-          'blockId': typeforce.maybe(hash256),
-          'txHex': hex,
-          'txId': hash256
+          'blockId': typeforce.maybe(Hex256bit),
+          'txHex': Hex,
+          'txId': Hex256bit
         }
       ]
     },
@@ -127,30 +127,30 @@ module.exports = {
       'arguments': {},
       'expected': [
         {
-          'txHex': hex,
-          'txId': hash256
+          'txHex': Hex,
+          'txId': Hex256bit
         }
       ]
     },
     'propagate': {
       'arguments': {
-        'txHexs': [hex]
+        'txHexs': [Hex]
       },
-      'expected': [hash256]
+      'expected': [Hex256bit]
     },
     'summary': {
       'arguments': {
-        'txIds': [hash256]
+        'txIds': [Hex256bit]
       },
       'expected': [
         {
           'blockHeight': '?Number',
-          'blockId': typeforce.maybe(hash256),
+          'blockId': typeforce.maybe(Hex256bit),
           'nInputs': 'Number',
           'nOutputs': 'Number',
           'totalInputValue': 'Number',
           'totalOutputValue': 'Number',
-          'txId': hash256
+          'txId': Hex256bit
         }
       ]
     }
