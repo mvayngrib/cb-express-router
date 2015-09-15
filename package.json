@@ -3,6 +3,14 @@
   "version": "0.2.8",
   "description": "cb-http-router",
   "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/common-blockchain/cb-http-router.git"
+  },
+  "bugs": {
+    "url": "https://github.com/common-blockchain/cb-http-router/issues"
+  },
+  "homepage": "https://github.com/common-blockchain/cb-http-router",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
