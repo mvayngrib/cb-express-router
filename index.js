@@ -5,7 +5,7 @@ var typeforce = require('typeforce')
 var types = require('./types')
 
 function createRouter (api) {
-  var router = express()
+  var router = new express.Router()
 
   // parse application/json
   router.use(bodyParser.json())
@@ -22,7 +22,6 @@ function createRouter (api) {
       // validate the inputs
       try {
         typeforce(cArgType, req.body, true)
-
       } catch (e) {
         return res.jsend.error(e.message)
       }
@@ -33,7 +32,6 @@ function createRouter (api) {
         // enforce our own spec. compliance
         try {
           typeforce(cExpType, results, true)
-
         } catch (e) {
           return res.jsend.error(e.message)
         }
