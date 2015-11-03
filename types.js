@@ -35,7 +35,7 @@ module.exports = {
       'expected': [
         {
           'blockHeight': '?Number',
-          'blockId': typeforce.maybe(Hex),
+          'blockId': typeforce.maybe(Hex256bit),
           'txHex': Hex,
           'txId': Hex256bit
         }
