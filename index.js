@@ -1,6 +1,5 @@
 var bodyParser = require('body-parser')
 var express = require('express')
-var jsend = require('jsend')
 var typeforce = require('typeforce')
 var types = require('./types')
 
@@ -9,9 +8,6 @@ function createRouter (api) {
 
   // parse application/json
   router.use(bodyParser.json())
-
-  // jsend
-  router.use(jsend.middleware)
 
   // POST route helper function
   function endpoint (route, type, callback) {
@@ -23,20 +19,20 @@ function createRouter (api) {
       try {
         typeforce(cArgType, req.body, true)
       } catch (e) {
-        return res.jsend.error(e.message)
+        return res.status(400).send(e.message)
       }
 
       callback(req.body, function (err, results) {
-        if (err) return res.jsend.error(err.message)
+        if (err) return res.status(500).send(err.message)
 
         // enforce our own spec. compliance
         try {
           typeforce(cExpType, results, true)
         } catch (e) {
-          return res.jsend.error(e.message)
+          return res.status(500).send(e.message)
         }
 
-        return res.jsend.success(results)
+        res.status(200).json(results)
       })
     })
   }
