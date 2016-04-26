@@ -11,6 +11,8 @@ function createRouter (api) {
 
   // POST route helper function
   function endpoint (route, type, callback) {
+    if (!hasEndpoint(api, route)) return
+
     var cArgType = typeforce.compile(type.arguments)
     var cExpType = typeforce.compile(type.expected)
 
@@ -88,6 +90,17 @@ function createRouter (api) {
   })
 
   return router
+}
+
+function hasEndpoint (api, route) {
+  // assumes route corresponds to api path
+  var path = route.slice(1).split('/')
+  for (var i = 0; i < path.length; i++) {
+    api = api[path[i]]
+    if (!api) return false
+  }
+
+  return true
 }
 
 module.exports = createRouter
