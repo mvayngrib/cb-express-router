@@ -2,6 +2,11 @@ var bodyParser = require('body-parser')
 var express = require('express')
 var typeforce = require('typeforce')
 var types = require('./types')
+var BODY_PROPS = {
+  transactions: 'txIds',
+  addresses: 'addresses',
+  blocks: 'blockIds'
+}
 
 function createRouter (api) {
   var router = new express.Router()
@@ -15,8 +20,19 @@ function createRouter (api) {
 
     var cArgType = typeforce.compile(type.arguments)
     var cExpType = typeforce.compile(type.expected)
+    var bodyProp = BODY_PROPS[route.split('/')[1]]
 
-    router.post(route, function (req, res) {
+    router.post(route, handleRequest)
+
+    if (route.indexOf('/propagate') === -1) {
+      router.get(route + '/:rawbody', function (req, res) {
+        req.body = {}
+        req.body[bodyProp] = req.params.rawbody.split(',')
+        handleRequest(req, res)
+      })
+    }
+
+    function handleRequest (req, res) {
       // validate the inputs
       try {
         typeforce(cArgType, req.body, true)
@@ -36,7 +52,7 @@ function createRouter (api) {
 
         res.status(200).json(results)
       })
-    })
+    }
   }
 
   endpoint('/addresses/summary', types.addresses.summary, function (body, callback) {
