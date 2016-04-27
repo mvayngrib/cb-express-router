@@ -41,7 +41,7 @@ function createRouter (api) {
       }
 
       callback(req.body, function (err, results) {
-        if (err) return res.status(500).send(err.message)
+        if (err) return res.status(err.status || 500).send(err.message)
 
         // enforce our own spec. compliance
         try {
