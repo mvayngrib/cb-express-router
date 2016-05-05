@@ -45,7 +45,7 @@ function createRouter (api) {
 
         // enforce our own spec. compliance
         try {
-          typeforce(cExpType, results, true)
+          typeforce(cExpType, results)
         } catch (e) {
           return res.status(500).send(e.message)
         }
