@@ -8,7 +8,9 @@ var BODY_PROPS = {
   blocks: 'blockIds'
 }
 
-function createRouter (api) {
+function createRouter (api, opts) {
+  opts = opts || {}
+  var validateResponse = opts.validateResponse !== false
   var router = new express.Router()
 
   // parse application/json
@@ -25,9 +27,14 @@ function createRouter (api) {
     router.post(route, handleRequest)
 
     if (route.indexOf('/propagate') === -1) {
-      router.get(route + '/:rawbody', function (req, res) {
-        req.body = {}
-        req.body[bodyProp] = req.params.rawbody.split(',')
+      if (route.slice(-7) !== '/latest') route += '/:rawbody'
+
+      router.get(route, function (req, res) {
+        if (req.params.rawbody) {
+          req.body = {}
+          req.body[bodyProp] = req.params.rawbody.split(',')
+        }
+
         handleRequest(req, res)
       })
     }
@@ -44,10 +51,12 @@ function createRouter (api) {
         if (err) return res.status(err.status || 500).send(err.message)
 
         // enforce our own spec. compliance
-        try {
-          typeforce(cExpType, results)
-        } catch (e) {
-          return res.status(500).send(e.message)
+        if (validateResponse) {
+          try {
+            typeforce(cExpType, results)
+          } catch (e) {
+            return res.status(500).send(e.message)
+          }
         }
 
         res.status(200).json(results)
